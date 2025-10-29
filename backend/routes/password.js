@@ -22,8 +22,7 @@ router.post('/forgot', async (req, res) => {
     const usuario = await Usuario.findOne({ where: { email } });
     
     if (!usuario) {
-      // Por segurança, não informar se o email existe ou não
-      return res.json({ message: 'Se o email existir, você receberá um código de recuperação' });
+      return res.status(404).json({ message: 'Email não encontrado' });
     }
 
     // Gerar código de 6 dígitos
@@ -40,16 +39,17 @@ router.post('/forgot', async (req, res) => {
     if (emailService.isConfigured()) {
       try {
         await emailService.sendPasswordResetCode(email, usuario.nome, code);
+        console.log(`Código de recuperação enviado para ${email}: ${code}`);
       } catch (error) {
         console.error('Erro ao enviar email:', error);
         return res.status(500).json({ message: 'Erro ao enviar email de recuperação' });
       }
     } else {
-      console.log(`Código de recuperação para ${email}: ${code}`);
+      console.log(`[AVISO] Serviço de email não configurado. Código para ${email}: ${code}`);
       return res.status(500).json({ message: 'Serviço de email não configurado' });
     }
 
-    res.json({ message: 'Código de recuperação enviado para o email' });
+    res.json({ message: 'Código enviado para seu email' });
   } catch (error) {
     console.error('Erro ao solicitar recuperação de senha:', error);
     res.status(500).json({ message: 'Erro ao solicitar recuperação de senha' });
