@@ -120,6 +120,11 @@ const Login = () => {
                   />
                   <div className="invalid-feedback">Por favor, digite sua senha.</div>
                 </div>
+                <div className="text-end mt-2">
+                  <Link to="/forgot-password" className="forgot-password-link">
+                    Esqueci minha senha
+                  </Link>
+                </div>
               </div>
 
               <div className="d-grid">

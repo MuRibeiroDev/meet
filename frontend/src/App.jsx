@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Calendar from './pages/Calendar'
 import SalaDisplay from './pages/SalaDisplay'
+import ForgotPassword from './pages/ForgotPassword'
 
 // Componente de rota protegida
 const ProtectedRoute = ({ children }) => {
@@ -32,6 +33,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/sala" element={<SalaDisplay />} />
         
         <Route

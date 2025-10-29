@@ -7,6 +7,7 @@ import salasRoutes from './routes/salas.js';
 import agendamentosRoutes from './routes/agendamentos.js';
 import usuariosRoutes from './routes/usuarios.js';
 import salaDisplayRoutes from './routes/sala.js';
+import passwordRoutes from './routes/password.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/salas', salasRoutes);
 app.use('/api/agendamentos', agendamentosRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/sala', salaDisplayRoutes);
+app.use('/api/password', passwordRoutes);
 
 // Rota de teste
 app.get('/api/health', (req, res) => {

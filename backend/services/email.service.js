@@ -276,6 +276,105 @@ Sistema de Reuniões - Notificação Automática
     }
   }
 
+  async sendPasswordResetCode(recipientEmail, recipientName, code) {
+    if (!this.emailUser || !this.emailPassword) {
+      console.log('Serviço de email não configurado');
+      return false;
+    }
+
+    try {
+      const transporter = this._createTransporter();
+      if (!transporter) {
+        return false;
+      }
+
+      const htmlBody = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #374151; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+                .footer { background-color: #374151; color: white; padding: 15px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px; }
+                .code-box { background-color: white; padding: 30px; margin: 20px 0; text-align: center; border: 2px dashed #374151; border-radius: 8px; }
+                .code { font-size: 32px; font-weight: bold; color: #374151; letter-spacing: 8px; }
+                .warning { background-color: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; margin: 15px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>🔐 Recuperação de Senha</h2>
+                </div>
+                
+                <div class="content">
+                    <p>Olá <strong>${recipientName}</strong>,</p>
+                    
+                    <p>Recebemos uma solicitação para redefinir a senha da sua conta no Sistema de Reuniões.</p>
+                    
+                    <p>Use o código abaixo para redefinir sua senha:</p>
+                    
+                    <div class="code-box">
+                        <div class="code">${code}</div>
+                    </div>
+                    
+                    <div class="warning">
+                        <strong>⚠️ Importante:</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Este código é válido por <strong>15 minutos</strong></li>
+                            <li>Você tem <strong>3 tentativas</strong> para usar o código</li>
+                            <li>Se você não solicitou esta recuperação, ignore este email</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Após inserir o código, você poderá criar uma nova senha para sua conta.</p>
+                </div>
+                
+                <div class="footer">
+                    <p>Sistema de Reuniões - Notificação Automática</p>
+                    <p>Esta é uma mensagem automática, não responda este email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+      `;
+
+      const textBody = `
+Recuperação de Senha - Sistema de Reuniões
+
+Olá ${recipientName},
+
+Recebemos uma solicitação para redefinir a senha da sua conta.
+
+Seu código de recuperação: ${code}
+
+Este código é válido por 15 minutos e você tem 3 tentativas para usá-lo.
+
+Se você não solicitou esta recuperação, ignore este email.
+
+Sistema de Reuniões - Notificação Automática
+      `;
+
+      const mailOptions = {
+        from: `"${this.fromName}" <${this.emailUser}>`,
+        to: recipientEmail,
+        subject: `Código de Recuperação de Senha - ${code}`,
+        text: textBody,
+        html: htmlBody
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Email de recuperação de senha enviado para ${recipientEmail}`);
+      return true;
+
+    } catch (error) {
+      console.error('Erro ao enviar email de recuperação:', error);
+      return false;
+    }
+  }
+
   isConfigured() {
     return !!(this.emailUser && this.emailPassword);
   }

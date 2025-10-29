@@ -156,6 +156,20 @@ h1, h2, h3, h4, h5, h6 {
   color: white;
 }
 
+/* Esqueci minha senha */
+.forgot-password-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.forgot-password-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
 /* Divider */
 .divider {
   text-align: center;
