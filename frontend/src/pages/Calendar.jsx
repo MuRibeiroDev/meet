@@ -190,12 +190,17 @@ const Calendar = () => {
   }
 
   const mostrarDetalhesAgendamento = async (id) => {
+    // Abrir modal imediatamente com loading
+    setShowDetalhes(true)
+    setAgendamentoAtual(null)
+    
     try {
       const data = await agendamentosService.getById(id)
       setAgendamentoAtual(data)
-      setShowDetalhes(true)
     } catch (error) {
       console.error('Erro ao carregar detalhes:', error)
+      fecharDetalhes()
+      mostrarNotificacao('Erro ao carregar detalhes')
     }
   }
 
@@ -515,7 +520,7 @@ const Calendar = () => {
       )}
 
       {/* Modal Detalhes */}
-      {showDetalhes && agendamentoAtual && (
+      {showDetalhes && (
         <>
           <div className={`modal fade show ${closingDetalhes ? 'closing' : ''}`} style={{ display: 'block' }}>
             <div className="modal-dialog">
@@ -533,6 +538,14 @@ const Calendar = () => {
                   ></button>
                 </div>
                 <div className="modal-body">
+                  {!agendamentoAtual ? (
+                    <div className="text-center py-5">
+                      <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Carregando...</span>
+                      </div>
+                      <p className="mt-3 text-muted">Carregando detalhes...</p>
+                    </div>
+                  ) : (
                   <div className="row">
                     <div className="col-12 mb-3">
                       <h6 className="text-primary">{agendamentoAtual.titulo}</h6>
@@ -582,6 +595,7 @@ const Calendar = () => {
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
                 <div className="modal-footer">
                   <button
@@ -592,7 +606,7 @@ const Calendar = () => {
                     <i className="bi bi-x-circle me-2"></i>
                     Fechar
                   </button>
-                  {podeCancel() && (
+                  {agendamentoAtual && podeCancel() && (
                     <button
                       type="button"
                       className="btn btn-danger"

@@ -136,7 +136,10 @@ router.post('/reset', async (req, res) => {
 
     // Atualizar senha
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await usuario.update({ senha: hashedPassword });
+    usuario.senha = hashedPassword;
+    await usuario.save();
+
+    console.log(`Senha atualizada com sucesso para o usuário: ${email}`);
 
     // Remover código usado
     resetCodes.delete(email);

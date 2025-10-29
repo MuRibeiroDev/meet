@@ -457,10 +457,11 @@ body {
 }
 
 .modal-dialog-scrollable .modal-content {
-  max-height: calc(100vh - 2rem);
+  max-height: calc(100vh - 4rem);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  margin: 2rem 0;
 }
 
 .modal-dialog-scrollable .modal-body {
@@ -478,6 +479,7 @@ body {
   border: none;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  margin: 2rem 0;
 }
 
 .modal-header {

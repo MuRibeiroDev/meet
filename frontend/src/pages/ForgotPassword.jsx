@@ -16,14 +16,20 @@ const ForgotPassword = () => {
 
   const handleRequestCode = async (e) => {
     e.preventDefault()
+    
+    if (!email) {
+      setError('Digite um email válido')
+      return
+    }
+    
     setLoading(true)
     setError('')
     setMessage('')
 
     try {
-      const response = await api.post('/password/forgot', { email })
+      const response = await api.post('/password/forgot', { email }, { timeout: 10000 })
       setMessage(response.data.message)
-      setStep(2)
+      setTimeout(() => setStep(2), 500)
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao solicitar código')
     } finally {
@@ -33,29 +39,34 @@ const ForgotPassword = () => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    setError('')
-    setMessage('')
-
+    
     // Validações
+    if (code.length !== 6) {
+      setError('Digite o código de 6 dígitos')
+      return
+    }
+    
     if (newPassword.length < 6) {
       setError('A senha deve ter no mínimo 6 caracteres')
-      setLoading(false)
       return
     }
 
     if (newPassword !== confirmPassword) {
       setError('As senhas não coincidem')
-      setLoading(false)
       return
     }
+
+    setLoading(true)
+    setError('')
+    setMessage('')
 
     try {
       const response = await api.post('/password/reset', {
         email,
         code,
         newPassword
-      })
+      }, { timeout: 10000 })
+      
       setMessage(response.data.message)
       
       // Aguardar 2 segundos e redirecionar para login
@@ -64,7 +75,6 @@ const ForgotPassword = () => {
       }, 2000)
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao redefinir senha')
-    } finally {
       setLoading(false)
     }
   }
