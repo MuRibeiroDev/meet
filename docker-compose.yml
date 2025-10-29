@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Backend Node.js
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: reunioes-backend
+    restart: unless-stopped
+    ports:
+      - "5005:5000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+    networks:
+      - reunioes-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+    container_name: reunioes-frontend
+    restart: unless-stopped
+    ports:
+      - "5004:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - reunioes-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  reunioes-network:
+    driver: bridge
