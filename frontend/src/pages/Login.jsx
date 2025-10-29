@@ -12,6 +12,7 @@ const Login = () => {
   })
   const [loading, setLoading] = useState(false)
   const [validated, setValidated] = useState(false)
+  const [loginError, setLoginError] = useState('')
   const navigate = useNavigate()
   const setAuth = useAuthStore((state) => state.setAuth)
 
@@ -20,19 +21,24 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
+    // Limpar erro ao digitar
+    if (loginError) {
+      setLoginError('')
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    e.stopPropagation()
     
     const form = e.currentTarget
     if (form.checkValidity() === false) {
-      e.stopPropagation()
       setValidated(true)
       return
     }
 
     setLoading(true)
+    setLoginError('')
 
     try {
       const response = await authService.login(formData.email, formData.senha)
@@ -43,14 +49,37 @@ const Login = () => {
       document.querySelector('.login-container').classList.add('leaving')
       
       setTimeout(() => {
-        toast.success('Login realizado com sucesso!')
         navigate('/')
       }, 400)
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Email ou senha incorretos')
+      console.log('❌ Erro de login:', error)
+      console.log('📧 Email atual:', formData.email)
+      
+      const errorMessage = error.response?.data?.message || 'Email ou senha incorretos'
+      
+      // Manter o email, limpar apenas a senha
+      setFormData(prev => ({
+        email: prev.email, // Manter email
+        senha: '' // Limpar senha
+      }))
+      
+      setLoginError(errorMessage)
+      // toast.error(errorMessage) - Removido, só mostra no input
       setLoading(false)
+      setValidated(true)
+      
       document.body.classList.remove('login-leaving')
       document.querySelector('.login-container')?.classList.remove('leaving')
+      
+      // Focar no campo de senha após erro
+      setTimeout(() => {
+        const senhaInput = document.getElementById('senha')
+        if (senhaInput) {
+          senhaInput.focus()
+          senhaInput.classList.add('shake')
+          setTimeout(() => senhaInput.classList.remove('shake'), 500)
+        }
+      }, 100)
     }
   }
 
@@ -88,13 +117,14 @@ const Login = () => {
                   </span>
                   <input
                     type="email"
-                    className="form-control"
+                    className={`form-control ${loginError ? 'is-invalid' : ''}`}
                     id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="seu@email.com"
                     required
+                    disabled={loading}
                   />
                   <div className="invalid-feedback">Por favor, digite um email válido.</div>
                 </div>
@@ -110,15 +140,18 @@ const Login = () => {
                   </span>
                   <input
                     type="password"
-                    className="form-control"
+                    className={`form-control ${loginError ? 'is-invalid' : ''}`}
                     id="senha"
                     name="senha"
                     value={formData.senha}
                     onChange={handleChange}
                     placeholder="Sua senha"
                     required
+                    disabled={loading}
                   />
-                  <div className="invalid-feedback">Por favor, digite sua senha.</div>
+                  <div className="invalid-feedback">
+                    {loginError || 'Por favor, digite sua senha.'}
+                  </div>
                 </div>
                 <div className="text-end mt-2">
                   <Link to="/forgot-password" className="forgot-password-link">

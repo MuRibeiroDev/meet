@@ -6,6 +6,8 @@ import './Login.css'
 const ForgotPassword = () => {
   const navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: email, 2: código e senha
+  const [transitioning, setTransitioning] = useState(false)
+  const [transitionDirection, setTransitionDirection] = useState('forward') // forward ou backward
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -27,9 +29,16 @@ const ForgotPassword = () => {
     setMessage('')
 
     try {
-      const response = await api.post('/password/forgot', { email }, { timeout: 10000 })
+      const response = await api.post('/password/forgot', { email }, { timeout: 5000 })
       setMessage(response.data.message)
-      setTimeout(() => setStep(2), 500)
+      
+      // Animação de saída antes de mudar para step 2
+      setTransitionDirection('forward')
+      setTransitioning(true)
+      setTimeout(() => {
+        setStep(2)
+        setTransitioning(false)
+      }, 400)
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao solicitar código')
     } finally {
@@ -40,7 +49,7 @@ const ForgotPassword = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault()
     
-    // Validações
+    // Validações antes de iniciar loading
     if (code.length !== 6) {
       setError('Digite o código de 6 dígitos')
       return
@@ -65,14 +74,14 @@ const ForgotPassword = () => {
         email,
         code,
         newPassword
-      }, { timeout: 10000 })
+      }, { timeout: 5000 })
       
       setMessage(response.data.message)
       
-      // Aguardar 2 segundos e redirecionar para login
+      // Redirecionar mais rápido (1 segundo)
       setTimeout(() => {
         navigate('/login')
-      }, 2000)
+      }, 1000)
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao redefinir senha')
       setLoading(false)
@@ -81,11 +90,11 @@ const ForgotPassword = () => {
 
   return (
     <div className="login-container">
-      <div className="login-card">
+      <div className={`login-card ${transitioning ? `step-transitioning step-${transitionDirection}` : ''}`}>
         <div className="card">
           <div className="card-body">
             {/* Logo e Título */}
-            <div className="text-center mb-2">
+            <div className="text-center" style={{ marginBottom: step === 2 ? '1rem' : '0.5rem' }}>
               <div className="mb-1">
                 <img
                   src="/images/logo_osvaldozilli.png"
@@ -97,23 +106,16 @@ const ForgotPassword = () => {
               <h4 className="mb-2">
                 {step === 1 ? 'Recuperar Senha' : 'Redefinir Senha'}
               </h4>
-              <p className="text-muted mb-0">
-                {step === 1 
-                  ? 'Digite seu email para receber o código' 
-                  : 'Digite o código e sua nova senha'
-                }
-              </p>
+              {step === 1 && (
+                <p className="text-muted mb-0">
+                  Digite seu email para receber o código
+                </p>
+              )}
             </div>
 
-            {message && (
+            {message && step === 1 && (
               <div className="alert alert-success" role="alert">
                 {message}
-              </div>
-            )}
-
-            {error && (
-              <div className="alert alert-danger" role="alert">
-                {error}
               </div>
             )}
 
@@ -129,15 +131,23 @@ const ForgotPassword = () => {
                     </span>
                     <input
                       type="email"
-                      className="form-control"
+                      className={`form-control ${error && step === 1 ? 'is-invalid shake' : ''}`}
                       id="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                        if (error) setError('')
+                      }}
                       placeholder="seu@email.com"
                       required
                       disabled={loading}
                     />
                   </div>
+                  {error && step === 1 && (
+                    <div className="invalid-feedback d-block">
+                      {error}
+                    </div>
+                  )}
                 </div>
 
                 <div className="d-grid mb-3">
@@ -165,7 +175,7 @@ const ForgotPassword = () => {
               </form>
             ) : (
               <form onSubmit={handleResetPassword}>
-                <div className="mb-4">
+                <div className="mb-3">
                   <label htmlFor="code" className="form-label fw-medium">
                     Código de Recuperação
                   </label>
@@ -189,7 +199,7 @@ const ForgotPassword = () => {
                   <small className="text-muted">Digite o código de 6 dígitos enviado para seu email</small>
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-3">
                   <label htmlFor="newPassword" className="form-label fw-medium">
                     Nova Senha
                   </label>
@@ -210,7 +220,7 @@ const ForgotPassword = () => {
                   </div>
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-3">
                   <label htmlFor="confirmPassword" className="form-label fw-medium">
                     Confirmar Senha
                   </label>
@@ -220,15 +230,23 @@ const ForgotPassword = () => {
                     </span>
                     <input
                       type="password"
-                      className="form-control"
+                      className={`form-control ${error && step === 2 ? 'is-invalid shake' : ''}`}
                       id="confirmPassword"
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value)
+                        if (error) setError('')
+                      }}
                       placeholder="Digite a senha novamente"
                       required
                       disabled={loading}
                     />
                   </div>
+                  {error && step === 2 && (
+                    <div className="invalid-feedback d-block">
+                      {error}
+                    </div>
+                  )}
                 </div>
 
                 <div className="d-grid mb-3">
@@ -248,12 +266,17 @@ const ForgotPassword = () => {
                     type="button"
                     className="btn btn-outline-secondary"
                     onClick={() => {
-                      setStep(1)
-                      setCode('')
-                      setNewPassword('')
-                      setConfirmPassword('')
-                      setError('')
-                      setMessage('')
+                      setTransitionDirection('backward')
+                      setTransitioning(true)
+                      setTimeout(() => {
+                        setStep(1)
+                        setCode('')
+                        setNewPassword('')
+                        setConfirmPassword('')
+                        setError('')
+                        setMessage('')
+                        setTransitioning(false)
+                      }, 400)
                     }}
                     disabled={loading}
                   >

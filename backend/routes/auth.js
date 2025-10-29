@@ -98,9 +98,12 @@ router.post('/login', validacaoLogin, async (req, res) => {
     }
 
     // Verificar senha
-    console.log('Verificando senha...');
+    console.log('🔐 [LOGIN] Verificando senha...');
+    console.log('🔐 [LOGIN] Senha recebida (length):', senha.length);
+    console.log('🔐 [LOGIN] Hash armazenado:', usuario.senha_hash.substring(0, 20) + '...');
+    
     const senhaValida = await usuario.verificarSenha(senha);
-    console.log('Senha válida:', senhaValida);
+    console.log('🔐 [LOGIN] Senha válida:', senhaValida);
     
     if (!senhaValida) {
       return res.status(401).json({ message: 'Email ou senha inválidos' });

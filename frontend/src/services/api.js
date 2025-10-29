@@ -26,7 +26,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Só redirecionar para login se NÃO for uma requisição de login
+    // e se o usuário estiver autenticado (tem token)
+    if (error.response?.status === 401 && 
+        !error.config.url.includes('/auth/login') &&
+        useAuthStore.getState().token) {
       useAuthStore.getState().logout()
       window.location.href = '/login'
     }

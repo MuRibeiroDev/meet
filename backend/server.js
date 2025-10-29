@@ -76,9 +76,10 @@ const startServer = async () => {
     await sequelize.sync({ alter: false });
     console.log('✅ Modelos sincronizados com o banco de dados');
     
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Servidor rodando na porta ${PORT}`);
       console.log(`📍 API disponível em: http://localhost:${PORT}/api`);
+      console.log(`🌐 Acesso na rede: http://10.1.1.30:${PORT}/api`);
     });
   } catch (error) {
     console.error('❌ Erro ao iniciar servidor:', error);

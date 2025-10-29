@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuthStore } from '../store/authStore'
 import { authService } from '../services'
-import './Auth.css'
+import './Login.css'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,8 @@ const Register = () => {
     confirmarSenha: ''
   })
   const [loading, setLoading] = useState(false)
+  const [validated, setValidated] = useState(false)
+  const [registerError, setRegisterError] = useState('')
   const navigate = useNavigate()
   const setAuth = useAuthStore((state) => state.setAuth)
 
@@ -21,22 +23,36 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
+    // Limpar erro ao digitar
+    if (registerError) {
+      setRegisterError('')
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    e.stopPropagation()
+
+    const form = e.currentTarget
+    if (form.checkValidity() === false) {
+      setValidated(true)
+      return
+    }
 
     if (formData.senha !== formData.confirmarSenha) {
-      toast.error('As senhas não coincidem')
+      setRegisterError('As senhas não coincidem')
+      setValidated(true)
       return
     }
 
     if (formData.senha.length < 6) {
-      toast.error('A senha deve ter no mínimo 6 caracteres')
+      setRegisterError('A senha deve ter no mínimo 6 caracteres')
+      setValidated(true)
       return
     }
 
     setLoading(true)
+    setRegisterError('')
 
     try {
       const response = await authService.register(
@@ -45,86 +61,166 @@ const Register = () => {
         formData.senha
       )
       setAuth(response.usuario, response.token)
-      toast.success('Cadastro realizado com sucesso!')
-      navigate('/')
+      
+      // Animar saída
+      document.body.classList.add('login-leaving')
+      document.querySelector('.login-container').classList.add('leaving')
+      
+      setTimeout(() => {
+        navigate('/')
+      }, 400)
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Erro ao cadastrar')
-    } finally {
+      const errorMessage = error.response?.data?.message || 'Erro ao cadastrar'
+      setRegisterError(errorMessage)
       setLoading(false)
+      setValidated(true)
+      document.body.classList.remove('login-leaving')
+      document.querySelector('.login-container')?.classList.remove('leaving')
     }
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1>📅 Sistema de Reuniões</h1>
-          <h2>Cadastro</h2>
-        </div>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="card">
+          <div className="card-body">
+            {/* Logo e Título */}
+            <div className="text-center mb-2">
+              <div className="mb-1">
+                <img
+                  src="/images/logo_osvaldozilli.png"
+                  alt="Grupo Osvaldo Zilli"
+                  className="img-fluid"
+                  style={{ maxWidth: '200px', height: 'auto' }}
+                />
+              </div>
+              <h4 className="mb-2">Criar Nova Conta</h4>
+              <p className="text-muted mb-0">Preencha os dados para se cadastrar</p>
+            </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="nome">Nome Completo</label>
-            <input
-              type="text"
-              id="nome"
-              name="nome"
-              value={formData.nome}
-              onChange={handleChange}
-              required
-              placeholder="João da Silva"
-            />
+            <form
+              onSubmit={handleSubmit}
+              className={`needs-validation ${validated ? 'was-validated' : ''}`}
+              noValidate
+            >
+              <div className="mb-3">
+                <label htmlFor="nome" className="form-label fw-medium">
+                  Nome Completo
+                </label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-person"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    id="nome"
+                    name="nome"
+                    value={formData.nome}
+                    onChange={handleChange}
+                    placeholder="João da Silva"
+                    required
+                    disabled={loading}
+                  />
+                  <div className="invalid-feedback">Por favor, digite seu nome completo.</div>
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label fw-medium">
+                  Email
+                </label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-envelope"></i>
+                  </span>
+                  <input
+                    type="email"
+                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="seu@email.com"
+                    required
+                    disabled={loading}
+                  />
+                  <div className="invalid-feedback">Por favor, digite um email válido.</div>
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="senha" className="form-label fw-medium">
+                  Senha
+                </label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-lock"></i>
+                  </span>
+                  <input
+                    type="password"
+                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    id="senha"
+                    name="senha"
+                    value={formData.senha}
+                    onChange={handleChange}
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                    minLength={6}
+                    disabled={loading}
+                  />
+                  <div className="invalid-feedback">A senha deve ter no mínimo 6 caracteres.</div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="confirmarSenha" className="form-label fw-medium">
+                  Confirmar Senha
+                </label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-lock-fill"></i>
+                  </span>
+                  <input
+                    type="password"
+                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    id="confirmarSenha"
+                    name="confirmarSenha"
+                    value={formData.confirmarSenha}
+                    onChange={handleChange}
+                    placeholder="Digite a senha novamente"
+                    required
+                    disabled={loading}
+                  />
+                  <div className="invalid-feedback">
+                    {registerError || 'Por favor, confirme sua senha.'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="d-grid">
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? (
+                    <span className="spinner-border spinner-border-sm"></span>
+                  ) : (
+                    <>
+                      <i className="bi bi-person-plus me-2"></i>Criar Conta
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            <div className="divider">
+              <span>ou</span>
+            </div>
+
+            <div className="d-grid">
+              <Link to="/login" className="btn btn-outline-secondary">
+                <i className="bi bi-arrow-left me-2"></i>Voltar para Login
+              </Link>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="seu@email.com"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="senha">Senha</label>
-            <input
-              type="password"
-              id="senha"
-              name="senha"
-              value={formData.senha}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-              minLength={6}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmarSenha">Confirmar Senha</label>
-            <input
-              type="password"
-              id="confirmarSenha"
-              name="confirmarSenha"
-              value={formData.confirmarSenha}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Cadastrando...' : 'Cadastrar'}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          <p>
-            Já tem uma conta? <Link to="/login">Faça login</Link>
-          </p>
         </div>
       </div>
     </div>
