@@ -320,15 +320,6 @@ Sistema de Reuniões - Notificação Automática
                         <div class="code">${code}</div>
                     </div>
                     
-                    <div class="warning">
-                        <strong>⚠️ Importante:</strong>
-                        <ul style="margin: 10px 0; padding-left: 20px;">
-                            <li>Este código é válido por <strong>15 minutos</strong></li>
-                            <li>Você tem <strong>3 tentativas</strong> para usar o código</li>
-                            <li>Se você não solicitou esta recuperação, ignore este email</li>
-                        </ul>
-                    </div>
-                    
                     <p>Após inserir o código, você poderá criar uma nova senha para sua conta.</p>
                 </div>
                 
@@ -350,9 +341,7 @@ Recebemos uma solicitação para redefinir a senha da sua conta.
 
 Seu código de recuperação: ${code}
 
-Este código é válido por 15 minutos e você tem 3 tentativas para usá-lo.
-
-Se você não solicitou esta recuperação, ignore este email.
+Após inserir o código, você poderá criar uma nova senha para sua conta.
 
 Sistema de Reuniões - Notificação Automática
       `;

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import './ForgotPassword.css'
+import './Login.css'
 
 const ForgotPassword = () => {
   const navigate = useNavigate()
@@ -70,118 +70,190 @@ const ForgotPassword = () => {
   }
 
   return (
-    <div className="forgot-password-container">
-      <div className="forgot-password-card">
-        <div className="forgot-password-header">
-          <h2>🔐 Recuperar Senha</h2>
-          <p>{step === 1 ? 'Digite seu email para receber o código' : 'Digite o código e sua nova senha'}</p>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="card">
+          <div className="card-body">
+            {/* Logo e Título */}
+            <div className="text-center mb-2">
+              <div className="mb-1">
+                <img
+                  src="/images/logo_osvaldozilli.png"
+                  alt="Grupo Osvaldo Zilli"
+                  className="img-fluid"
+                  style={{ maxWidth: '200px', height: 'auto' }}
+                />
+              </div>
+              <h4 className="mb-2">
+                {step === 1 ? 'Recuperar Senha' : 'Redefinir Senha'}
+              </h4>
+              <p className="text-muted mb-0">
+                {step === 1 
+                  ? 'Digite seu email para receber o código' 
+                  : 'Digite o código e sua nova senha'
+                }
+              </p>
+            </div>
+
+            {message && (
+              <div className="alert alert-success" role="alert">
+                {message}
+              </div>
+            )}
+
+            {error && (
+              <div className="alert alert-danger" role="alert">
+                {error}
+              </div>
+            )}
+
+            {step === 1 ? (
+              <form onSubmit={handleRequestCode}>
+                <div className="mb-4">
+                  <label htmlFor="email" className="form-label fw-medium">
+                    Email
+                  </label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-envelope"></i>
+                    </span>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-grid mb-3">
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? (
+                      <span className="spinner-border spinner-border-sm"></span>
+                    ) : (
+                      <>
+                        <i className="bi bi-envelope me-2"></i>Enviar Código
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="d-grid">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => navigate('/login')}
+                    disabled={loading}
+                  >
+                    <i className="bi bi-arrow-left me-2"></i>Voltar para Login
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPassword}>
+                <div className="mb-4">
+                  <label htmlFor="code" className="form-label fw-medium">
+                    Código de Recuperação
+                  </label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-shield-lock"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control text-center"
+                      id="code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="000000"
+                      maxLength="6"
+                      required
+                      disabled={loading}
+                      style={{ letterSpacing: '0.5rem', fontSize: '1.2rem', fontWeight: '600' }}
+                    />
+                  </div>
+                  <small className="text-muted">Digite o código de 6 dígitos enviado para seu email</small>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="newPassword" className="form-label fw-medium">
+                    Nova Senha
+                  </label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-lock"></i>
+                    </span>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="newPassword"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="confirmPassword" className="form-label fw-medium">
+                    Confirmar Senha
+                  </label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-lock-fill"></i>
+                    </span>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Digite a senha novamente"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-grid mb-3">
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? (
+                      <span className="spinner-border spinner-border-sm"></span>
+                    ) : (
+                      <>
+                        <i className="bi bi-check-circle me-2"></i>Redefinir Senha
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="d-grid">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => {
+                      setStep(1)
+                      setCode('')
+                      setNewPassword('')
+                      setConfirmPassword('')
+                      setError('')
+                      setMessage('')
+                    }}
+                    disabled={loading}
+                  >
+                    <i className="bi bi-arrow-clockwise me-2"></i>Solicitar Novo Código
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
-
-        {message && (
-          <div className="message success">
-            {message}
-          </div>
-        )}
-
-        {error && (
-          <div className="message error">
-            {error}
-          </div>
-        )}
-
-        {step === 1 ? (
-          <form onSubmit={handleRequestCode}>
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu-email@exemplo.com"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Enviando...' : 'Enviar Código'}
-            </button>
-
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => navigate('/login')}
-              disabled={loading}
-            >
-              Voltar para Login
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleResetPassword}>
-            <div className="form-group">
-              <label htmlFor="code">Código de Recuperação</label>
-              <input
-                type="text"
-                id="code"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="000000"
-                maxLength="6"
-                required
-                disabled={loading}
-                className="code-input"
-              />
-              <small>Digite o código de 6 dígitos enviado para seu email</small>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="newPassword">Nova Senha</label>
-              <input
-                type="password"
-                id="newPassword"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirmar Senha</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Digite a senha novamente"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Redefinindo...' : 'Redefinir Senha'}
-            </button>
-
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                setStep(1)
-                setCode('')
-                setNewPassword('')
-                setConfirmPassword('')
-                setError('')
-                setMessage('')
-              }}
-              disabled={loading}
-            >
-              Solicitar Novo Código
-            </button>
-          </form>
-        )}
       </div>
     </div>
   )
