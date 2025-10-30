@@ -113,7 +113,7 @@ const Register = () => {
                   </span>
                   <input
                     type="text"
-                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    className={`form-control ${registerError ? 'is-invalid shake' : ''}`}
                     id="nome"
                     name="nome"
                     value={formData.nome}
@@ -122,7 +122,6 @@ const Register = () => {
                     required
                     disabled={loading}
                   />
-                  <div className="invalid-feedback">Por favor, digite seu nome completo.</div>
                 </div>
               </div>
 
@@ -136,7 +135,7 @@ const Register = () => {
                   </span>
                   <input
                     type="email"
-                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    className={`form-control ${registerError ? 'is-invalid shake' : ''}`}
                     id="email"
                     name="email"
                     value={formData.email}
@@ -145,7 +144,6 @@ const Register = () => {
                     required
                     disabled={loading}
                   />
-                  <div className="invalid-feedback">Por favor, digite um email válido.</div>
                 </div>
               </div>
 
@@ -159,7 +157,7 @@ const Register = () => {
                   </span>
                   <input
                     type="password"
-                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    className={`form-control ${registerError ? 'is-invalid shake' : ''}`}
                     id="senha"
                     name="senha"
                     value={formData.senha}
@@ -169,7 +167,6 @@ const Register = () => {
                     minLength={6}
                     disabled={loading}
                   />
-                  <div className="invalid-feedback">A senha deve ter no mínimo 6 caracteres.</div>
                 </div>
               </div>
 
@@ -183,7 +180,7 @@ const Register = () => {
                   </span>
                   <input
                     type="password"
-                    className={`form-control ${registerError ? 'is-invalid' : ''}`}
+                    className={`form-control ${registerError ? 'is-invalid shake' : ''}`}
                     id="confirmarSenha"
                     name="confirmarSenha"
                     value={formData.confirmarSenha}
@@ -192,10 +189,13 @@ const Register = () => {
                     required
                     disabled={loading}
                   />
-                  <div className="invalid-feedback">
-                    {registerError || 'Por favor, confirme sua senha.'}
-                  </div>
                 </div>
+                {registerError && (
+                  <div className="text-danger mt-2" style={{ fontSize: '0.875rem' }}>
+                    <i className="bi bi-exclamation-circle me-1"></i>
+                    {registerError}
+                  </div>
+                )}
               </div>
 
               <div className="d-grid">

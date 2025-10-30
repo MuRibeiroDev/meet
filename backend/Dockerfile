@@ -1,8 +1,12 @@
 # Dockerfile para Backend Node.js
 FROM node:18-alpine
 
-# Instalar dependências do sistema para melhor performance
-RUN apk add --no-cache tini
+# Instalar dependências do sistema para melhor performance e timezone
+RUN apk add --no-cache tini tzdata
+
+# Configurar timezone
+ENV TZ=America/Sao_Paulo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Definir diretório de trabalho
 WORKDIR /app

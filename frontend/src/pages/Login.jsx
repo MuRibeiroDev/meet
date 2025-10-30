@@ -117,7 +117,7 @@ const Login = () => {
                   </span>
                   <input
                     type="email"
-                    className={`form-control ${loginError ? 'is-invalid' : ''}`}
+                    className={`form-control ${loginError ? 'is-invalid shake' : ''}`}
                     id="email"
                     name="email"
                     value={formData.email}
@@ -126,7 +126,6 @@ const Login = () => {
                     required
                     disabled={loading}
                   />
-                  <div className="invalid-feedback">Por favor, digite um email válido.</div>
                 </div>
               </div>
 
@@ -140,7 +139,7 @@ const Login = () => {
                   </span>
                   <input
                     type="password"
-                    className={`form-control ${loginError ? 'is-invalid' : ''}`}
+                    className={`form-control ${loginError ? 'is-invalid shake' : ''}`}
                     id="senha"
                     name="senha"
                     value={formData.senha}
@@ -149,9 +148,6 @@ const Login = () => {
                     required
                     disabled={loading}
                   />
-                  <div className="invalid-feedback">
-                    {loginError || 'Por favor, digite sua senha.'}
-                  </div>
                 </div>
                 <div className="text-end mt-2">
                   <Link to="/forgot-password" className="forgot-password-link">
