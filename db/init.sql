@@ -644,10 +644,7 @@ pg_dump: dumping contents of table "public.agendamentos"
 -- Data for Name: agendamentos; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.agendamentos (id, sala_id, usuario_id, titulo, descricao, data_inicio, data_fim, status, participantes, observacoes, criado_em, atualizado_em, link_reuniao) FROM stdin;
-pg_dump: processing data for table "public.historico_agendamentos"
-pg_dump: dumping contents of table "public.historico_agendamentos"
-\.
+-- Nenhum agendamento inicial
 
 
 --
@@ -656,10 +653,7 @@ pg_dump: dumping contents of table "public.historico_agendamentos"
 -- Data for Name: historico_agendamentos; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.historico_agendamentos (id, agendamento_id, acao, usuario_id, detalhes, data_acao) FROM stdin;
-pg_dump: processing data for table "public.salas"
-pg_dump: dumping contents of table "public.salas"
-\.
+-- Nenhum histórico inicial
 
 
 --
@@ -668,13 +662,11 @@ pg_dump: dumping contents of table "public.salas"
 -- Data for Name: salas; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.salas (id, nome, capacidade, ativa, criado_em, atualizado_em) FROM stdin;
-pg_dump: processing data for table "public.usuarios"
-pg_dump: dumping contents of table "public.usuarios"
-2	Sala da Direita	5	t	2025-10-02 15:58:12.316163	2025-10-02 15:58:12.316163
-1	Sala da Esquerda	7	t	2025-10-02 12:21:04.715116	2025-10-02 15:58:12.49113
-3	Audit├│rio	30	t	2025-10-02 15:59:54.395755	2025-10-02 15:59:54.395755
-\.
+-- Inserir salas
+INSERT INTO public.salas (nome, capacidade, ativa, criado_em, atualizado_em) VALUES
+('Sala da Esquerda', 7, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Sala da Direita', 5, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('Auditório', 30, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 --
@@ -683,8 +675,7 @@ pg_dump: dumping contents of table "public.usuarios"
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.usuarios (id, nome, email, ativo, criado_em, atualizado_em, senha_hash) FROM stdin;
-\.
+-- Nenhum usuário inicial (usuários serão criados via registro)
 
 
 --
