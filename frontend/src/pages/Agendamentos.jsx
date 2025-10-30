@@ -7,6 +7,7 @@ import './Agendamentos.css'
 
 const Agendamentos = () => {
   const [agendamentos, setAgendamentos] = useState([])
+  const [novosAgendamentos, setNovosAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
   const [filtro, setFiltro] = useState('todos') // todos, confirmado, cancelado
 
@@ -14,17 +15,40 @@ const Agendamentos = () => {
     loadAgendamentos()
   }, [filtro])
 
-  const loadAgendamentos = async () => {
+  // Polling para atualização em tempo real (a cada 15 segundos)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadAgendamentos(true) // silent mode
+    }, 15000) // 15 segundos
+
+    return () => clearInterval(interval)
+  }, [filtro, agendamentos])
+
+  const loadAgendamentos = async (silent = false) => {
     try {
-      setLoading(true)
+      if (!silent) {
+        setLoading(true)
+      }
       const params = filtro !== 'todos' ? { status: filtro } : {}
       const data = await agendamentosService.getAll(params)
+      
+      // Detectar novos agendamentos
+      if (agendamentos.length > 0) {
+        const novosIds = data.filter(ag => !agendamentos.find(old => old.id === ag.id)).map(ag => ag.id)
+        if (novosIds.length > 0) {
+          setNovosAgendamentos(novosIds)
+          setTimeout(() => setNovosAgendamentos([]), 1000)
+        }
+      }
+      
       setAgendamentos(data)
     } catch (error) {
       toast.error('Erro ao carregar agendamentos')
       console.error(error)
     } finally {
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
     }
   }
 
@@ -81,7 +105,12 @@ const Agendamentos = () => {
   return (
     <div className="agendamentos-page">
       <div className="page-header">
-        <h1>Meus Agendamentos</h1>
+        <h1>
+          Meus Agendamentos
+          <span className="live-indicator ms-2" title="Atualização automática">
+            <i className="bi bi-circle-fill text-success" style={{ fontSize: '0.5rem' }}></i>
+          </span>
+        </h1>
         <div className="filtros">
           <button
             className={`filtro-btn ${filtro === 'todos' ? 'active' : ''}`}
@@ -117,7 +146,7 @@ const Agendamentos = () => {
       ) : (
         <div className="agendamentos-grid">
           {agendamentos.map(agendamento => (
-            <div key={agendamento.id} className="agendamento-card">
+            <div key={agendamento.id} className={`agendamento-card ${novosAgendamentos.includes(agendamento.id) ? 'novo-agendamento' : ''}`}>
               <div className="card-header">
                 <h3>{agendamento.titulo}</h3>
                 <span className={`status-badge ${getStatusColor(agendamento.status)}`}>

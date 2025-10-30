@@ -181,6 +181,45 @@
   to { transform: rotate(360deg); }
 }
 
+/* Indicador LIVE */
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.live-indicator .bi-circle-fill {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Animação para novos agendamentos */
+.agendamento-item.novo-agendamento {
+  animation: slideInFromRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100px) scale(0.9);
+  }
+  60% {
+    transform: translateX(-10px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-content {
     grid-template-columns: 1fr;

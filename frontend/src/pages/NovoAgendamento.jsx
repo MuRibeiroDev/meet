@@ -64,16 +64,16 @@ const NovoAgendamento = () => {
     setLoading(true)
 
     try {
-      // Construir datas ISO
-      const data_inicio = new Date(`${formData.data}T${formData.hora_inicio}:00`)
-      const data_fim = new Date(`${formData.data}T${formData.hora_fim}:00`)
+      // Construir datas no formato local (sem conversão para UTC)
+      const data_inicio = `${formData.data}T${formData.hora_inicio}:00`
+      const data_fim = `${formData.data}T${formData.hora_fim}:00`
 
       const agendamentoData = {
         sala_id: parseInt(formData.sala_id),
         titulo: formData.titulo,
         descricao: formData.descricao || null,
-        data_inicio: data_inicio.toISOString(),
-        data_fim: data_fim.toISOString(),
+        data_inicio: data_inicio,
+        data_fim: data_fim,
         participantes: parseInt(formData.participantes) || 1,
         link_reuniao: formData.link_reuniao || null,
         observacoes: formData.observacoes || null

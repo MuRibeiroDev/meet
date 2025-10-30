@@ -17,8 +17,10 @@ const diasSemana = [
 const Calendar = () => {
   const [dataAtual, setDataAtual] = useState(new Date())
   const [agendamentos, setAgendamentos] = useState([])
+  const [novosAgendamentos, setNovosAgendamentos] = useState([])
   const [salas, setSalas] = useState([])
   const [loading, setLoading] = useState(false)
+  const [salvando, setSalvando] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [showDetalhes, setShowDetalhes] = useState(false)
   const [agendamentoAtual, setAgendamentoAtual] = useState(null)
@@ -47,6 +49,15 @@ const Calendar = () => {
     atualizarDataForm()
   }, [dataAtual])
 
+  // Polling para atualização em tempo real (a cada 10 segundos)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadAgendamentos(true) // silent mode - não mostra loading
+    }, 10000) // 10 segundos
+
+    return () => clearInterval(interval)
+  }, [dataAtual, agendamentos])
+
   useEffect(() => {
     if (notification.show) {
       const timer = setTimeout(() => {
@@ -69,18 +80,32 @@ const Calendar = () => {
     }
   }
 
-  const loadAgendamentos = async () => {
-    setLoading(true)
+  const loadAgendamentos = async (silent = false) => {
+    if (!silent) {
+      setLoading(true)
+    }
     try {
       const dataStr = formatarDataInput(dataAtual)
       console.log('Carregando agendamentos para:', dataStr)
       const data = await agendamentosService.getAll({ data_inicio: dataStr, data_fim: dataStr })
       console.log('Agendamentos recebidos:', data)
+      
+      // Detectar novos agendamentos
+      if (agendamentos.length > 0) {
+        const novosIds = data.filter(ag => !agendamentos.find(old => old.id === ag.id)).map(ag => ag.id)
+        if (novosIds.length > 0) {
+          setNovosAgendamentos(novosIds)
+          setTimeout(() => setNovosAgendamentos([]), 1000) // Remove a classe após a animação
+        }
+      }
+      
       setAgendamentos(data)
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error)
     } finally {
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
     }
   }
 
@@ -141,6 +166,7 @@ const Calendar = () => {
     const salaObj = salas.find(s => s.id === parseInt(formData.sala_id))
     const salaNome = salaObj ? salaObj.nome : 'Reunião'
 
+    setSalvando(true)
     try {
       // Criar datas considerando timezone local e enviar como está
       const dataInicio = new Date(`${formData.data}T${formData.hora_inicio}:00`)
@@ -186,6 +212,8 @@ const Calendar = () => {
     } catch (error) {
       console.error('Erro ao salvar:', error)
       mostrarNotificacao('Erro ao agendar reunião', 'error')
+    } finally {
+      setSalvando(false)
     }
   }
 
@@ -318,7 +346,7 @@ const Calendar = () => {
                 {agendamentos.map((ag) => (
                   <div
                     key={ag.id}
-                    className="appointment-card"
+                    className={`appointment-card ${novosAgendamentos.includes(ag.id) ? 'novo-agendamento' : ''}`}
                     onClick={() => mostrarDetalhesAgendamento(ag.id)}
                   >
                     <div className="appointment-time">
@@ -500,6 +528,7 @@ const Calendar = () => {
                     type="button"
                     className="btn btn-secondary"
                     onClick={fecharModal}
+                    disabled={salvando}
                   >
                     Cancelar
                   </button>
@@ -507,9 +536,22 @@ const Calendar = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={salvarAgendamento}
+                    disabled={salvando}
+                    style={{ width: '102px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <i className="bi bi-check-circle me-1"></i>
-                    Agendar
+                    {salvando ? (
+                      <span 
+                        className="spinner-border" 
+                        role="status" 
+                        aria-hidden="true"
+                        style={{ width: '1rem', height: '1rem', borderWidth: '0.15em' }}
+                      ></span>
+                    ) : (
+                      <>
+                        <i className="bi bi-check-circle me-1"></i>
+                        Agendar
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

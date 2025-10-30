@@ -7,6 +7,7 @@ import './Dashboard.css'
 
 const Dashboard = () => {
   const [agendamentos, setAgendamentos] = useState([])
+  const [novosAgendamentos, setNovosAgendamentos] = useState([])
   const [salas, setSalas] = useState([])
   const [loading, setLoading] = useState(true)
   const [dataAtual, setDataAtual] = useState(new Date())
@@ -15,9 +16,20 @@ const Dashboard = () => {
     loadData()
   }, [dataAtual])
 
-  const loadData = async () => {
+  // Polling para atualização em tempo real (a cada 15 segundos)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadData(true) // silent mode
+    }, 15000) // 15 segundos
+
+    return () => clearInterval(interval)
+  }, [dataAtual, agendamentos])
+
+  const loadData = async (silent = false) => {
     try {
-      setLoading(true)
+      if (!silent) {
+        setLoading(true)
+      }
       const [agendamentosData, salasData] = await Promise.all([
         agendamentosService.getAll({
           data_inicio: startOfWeek(dataAtual).toISOString(),
@@ -25,13 +37,25 @@ const Dashboard = () => {
         }),
         salasService.getAll()
       ])
+      
+      // Detectar novos agendamentos
+      if (agendamentos.length > 0) {
+        const novosIds = agendamentosData.filter(ag => !agendamentos.find(old => old.id === ag.id)).map(ag => ag.id)
+        if (novosIds.length > 0) {
+          setNovosAgendamentos(novosIds)
+          setTimeout(() => setNovosAgendamentos([]), 1000)
+        }
+      }
+      
       setAgendamentos(agendamentosData)
       setSalas(salasData)
     } catch (error) {
       toast.error('Erro ao carregar dados')
       console.error(error)
     } finally {
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
     }
   }
 
@@ -63,7 +87,12 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <h1>Dashboard</h1>
+        <h1>
+          Dashboard
+          <span className="live-indicator ms-2" title="Atualização automática">
+            <i className="bi bi-circle-fill text-success" style={{ fontSize: '0.5rem' }}></i>
+          </span>
+        </h1>
         <p className="subtitle">
           {format(new Date(), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
         </p>
@@ -111,7 +140,7 @@ const Dashboard = () => {
           ) : (
             <div className="agendamentos-list">
               {agendamentosHoje.map(ag => (
-                <div key={ag.id} className="agendamento-item">
+                <div key={ag.id} className={`agendamento-item ${novosAgendamentos.includes(ag.id) ? 'novo-agendamento' : ''}`}>
                   <div className="agendamento-time">
                     {format(new Date(ag.data_inicio), 'HH:mm')} - 
                     {format(new Date(ag.data_fim), 'HH:mm')}
@@ -134,7 +163,7 @@ const Dashboard = () => {
           ) : (
             <div className="agendamentos-list">
               {proximosAgendamentos.map(ag => (
-                <div key={ag.id} className="agendamento-item">
+                <div key={ag.id} className={`agendamento-item ${novosAgendamentos.includes(ag.id) ? 'novo-agendamento' : ''}`}>
                   <div className="agendamento-date">
                     {format(new Date(ag.data_inicio), "dd 'de' MMM", { locale: ptBR })}
                   </div>
