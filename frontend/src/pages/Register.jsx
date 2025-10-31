@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuthStore } from '../store/authStore'
@@ -15,7 +15,14 @@ const Register = () => {
   const [validated, setValidated] = useState(false)
   const [registerError, setRegisterError] = useState('')
   const navigate = useNavigate()
-  const setAuth = useAuthStore((state) => state.setAuth)
+  const { token, setAuth } = useAuthStore()
+
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (token) {
+      navigate('/', { replace: true })
+    }
+  }, [token, navigate])
 
   const handleChange = (e) => {
     setFormData({

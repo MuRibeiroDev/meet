@@ -12,7 +12,13 @@ import ForgotPassword from './pages/ForgotPassword'
 // Componente de rota protegida
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuthStore()
-  return token ? children : <Navigate to="/login" />
+  return token ? children : <Navigate to="/login" replace />
+}
+
+// Componente de rota pública (redireciona se já autenticado)
+const PublicRoute = ({ children }) => {
+  const { token } = useAuthStore()
+  return !token ? children : <Navigate to="/" replace />
 }
 
 function App() {
@@ -31,8 +37,8 @@ function App() {
         theme="light"
       />
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/sala" element={<SalaDisplay />} />
         

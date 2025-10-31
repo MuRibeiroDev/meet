@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuthStore } from '../store/authStore'
@@ -14,7 +14,14 @@ const Login = () => {
   const [validated, setValidated] = useState(false)
   const [loginError, setLoginError] = useState('')
   const navigate = useNavigate()
-  const setAuth = useAuthStore((state) => state.setAuth)
+  const { token, setAuth } = useAuthStore()
+
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (token) {
+      navigate('/', { replace: true })
+    }
+  }, [token, navigate])
 
   const handleChange = (e) => {
     setFormData({
@@ -31,6 +38,9 @@ const Login = () => {
     e.preventDefault()
     e.stopPropagation()
     
+    // Prevenir múltiplos submits
+    if (loading) return
+    
     const form = e.currentTarget
     if (form.checkValidity() === false) {
       setValidated(true)
@@ -43,9 +53,9 @@ const Login = () => {
     try {
       const response = await authService.login(formData.email, formData.senha)
       setAuth(response.usuario, response.token)
-      navigate('/')
+      // O useEffect vai redirecionar automaticamente
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Email ou senha incorretos'
+      const errorMessage = error.message || error.response?.data?.message || 'Email ou senha incorretos'
       
       // Manter o email, limpar apenas a senha
       setFormData(prev => ({
@@ -54,13 +64,14 @@ const Login = () => {
       }))
       
       setLoginError(errorMessage)
-      setLoading(false)
       setValidated(true)
       
       // Focar no campo de senha após erro
       setTimeout(() => {
         document.getElementById('senha')?.focus()
       }, 100)
+    } finally {
+      setLoading(false)
     }
   }
 
