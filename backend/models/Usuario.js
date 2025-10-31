@@ -47,12 +47,14 @@ const Usuario = sequelize.define('Usuario', {
   hooks: {
     beforeCreate: async (usuario) => {
       if (usuario.senha_hash) {
-        usuario.senha_hash = await bcrypt.hash(usuario.senha_hash, 10);
+        // Reduzido de 10 para 8 rounds para melhor performance
+        usuario.senha_hash = await bcrypt.hash(usuario.senha_hash, 8);
       }
     },
     beforeUpdate: async (usuario) => {
       if (usuario.changed('senha_hash')) {
-        usuario.senha_hash = await bcrypt.hash(usuario.senha_hash, 10);
+        // Reduzido de 10 para 8 rounds para melhor performance
+        usuario.senha_hash = await bcrypt.hash(usuario.senha_hash, 8);
       }
     }
   }

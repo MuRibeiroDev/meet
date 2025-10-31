@@ -43,42 +43,23 @@ const Login = () => {
     try {
       const response = await authService.login(formData.email, formData.senha)
       setAuth(response.usuario, response.token)
-      
-      // Animar saída
-      document.body.classList.add('login-leaving')
-      document.querySelector('.login-container').classList.add('leaving')
-      
-      setTimeout(() => {
-        navigate('/')
-      }, 400)
+      navigate('/')
     } catch (error) {
-      console.log('❌ Erro de login:', error)
-      console.log('📧 Email atual:', formData.email)
-      
       const errorMessage = error.response?.data?.message || 'Email ou senha incorretos'
       
       // Manter o email, limpar apenas a senha
       setFormData(prev => ({
-        email: prev.email, // Manter email
-        senha: '' // Limpar senha
+        email: prev.email,
+        senha: ''
       }))
       
       setLoginError(errorMessage)
-      // toast.error(errorMessage) - Removido, só mostra no input
       setLoading(false)
       setValidated(true)
       
-      document.body.classList.remove('login-leaving')
-      document.querySelector('.login-container')?.classList.remove('leaving')
-      
       // Focar no campo de senha após erro
       setTimeout(() => {
-        const senhaInput = document.getElementById('senha')
-        if (senhaInput) {
-          senhaInput.focus()
-          senhaInput.classList.add('shake')
-          setTimeout(() => senhaInput.classList.remove('shake'), 500)
-        }
+        document.getElementById('senha')?.focus()
       }, 100)
     }
   }

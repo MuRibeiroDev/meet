@@ -85,9 +85,10 @@ router.post('/login', validacaoLogin, async (req, res) => {
     const { email, senha } = req.body;
 
     // Buscar usuário
-    const usuario = await Usuario.findOne({ where: { email: email.toLowerCase() } });
-    
-    console.log('Usuário encontrado:', usuario ? 'Sim' : 'Não');
+    const usuario = await Usuario.findOne({ 
+      where: { email: email.toLowerCase() },
+      attributes: ['id', 'nome', 'email', 'senha_hash', 'ativo']
+    });
     
     if (!usuario) {
       return res.status(401).json({ message: 'Email ou senha inválidos' });
@@ -98,12 +99,7 @@ router.post('/login', validacaoLogin, async (req, res) => {
     }
 
     // Verificar senha
-    console.log('🔐 [LOGIN] Verificando senha...');
-    console.log('🔐 [LOGIN] Senha recebida (length):', senha.length);
-    console.log('🔐 [LOGIN] Hash armazenado:', usuario.senha_hash.substring(0, 20) + '...');
-    
     const senhaValida = await usuario.verificarSenha(senha);
-    console.log('🔐 [LOGIN] Senha válida:', senhaValida);
     
     if (!senhaValida) {
       return res.status(401).json({ message: 'Email ou senha inválidos' });
@@ -149,7 +145,7 @@ router.post('/atualizar-senha-temporario', async (req, res) => {
 
     // Atualizar senha diretamente usando bcrypt
     const bcryptLib = await import('bcryptjs');
-    const senhaHash = await bcryptLib.default.hash(senha_nova, 10);
+    const senhaHash = await bcryptLib.default.hash(senha_nova, 8);
     
     // Atualizar no banco sem trigger de hook
     await usuario.sequelize.query(
