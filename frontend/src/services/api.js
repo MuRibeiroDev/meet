@@ -6,8 +6,13 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 10000 // 10 segundos timeout
+  timeout: 30000 // 30 segundos timeout
 })
+
+// Log da URL da API (apenas em desenvolvimento)
+if (import.meta.env.DEV) {
+  console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
+}
 
 // Interceptor para adicionar token em todas as requisições
 api.interceptors.request.use(

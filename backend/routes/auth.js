@@ -83,6 +83,7 @@ router.post('/login', validacaoLogin, async (req, res) => {
     }
 
     const { email, senha } = req.body;
+    console.log('[LOGIN] Tentativa de login:', email);
 
     // Buscar usuário
     const usuario = await Usuario.findOne({ 
@@ -91,26 +92,39 @@ router.post('/login', validacaoLogin, async (req, res) => {
     });
     
     if (!usuario) {
+      console.log('[LOGIN] Usuário não encontrado:', email);
       return res.status(401).json({ message: 'Email ou senha inválidos' });
     }
 
     if (!usuario.ativo) {
+      console.log('[LOGIN] Usuário inativo:', email);
       return res.status(401).json({ message: 'Usuário inativo' });
     }
 
+    console.log('[LOGIN] Verificando senha...');
+    const startTime = Date.now();
+    
     // Verificar senha
     const senhaValida = await usuario.verificarSenha(senha);
     
+    const timeElapsed = Date.now() - startTime;
+    console.log(`[LOGIN] Verificação de senha levou ${timeElapsed}ms`);
+    
     if (!senhaValida) {
+      console.log('[LOGIN] Senha inválida para:', email);
       return res.status(401).json({ message: 'Email ou senha inválidos' });
     }
 
+    console.log('[LOGIN] Gerando token...');
+    
     // Gerar token
     const token = jwt.sign(
       { id: usuario.id, email: usuario.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE }
     );
+
+    console.log('[LOGIN] Login bem-sucedido para:', email);
 
     res.json({
       message: 'Login realizado com sucesso',
