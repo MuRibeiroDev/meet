@@ -8,14 +8,8 @@
 -- - DML: Inserção dos dados iniciais (salas)
 -- 
 -- Executado automaticamente na inicialização do container PostgreSQL
+-- O banco de dados "reuniao" já é criado pela variável POSTGRES_DB
 --
-
--- Criar o banco de dados se não existir (executado no banco postgres padrão)
-SELECT 'CREATE DATABASE reuniao'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'reuniao')\gexec
-
--- Conectar ao banco de dados reuniao
-\connect reuniao
 
 SET client_encoding = 'UTF8';
 SET timezone = 'America/Sao_Paulo';
@@ -642,15 +636,13 @@ ALTER TABLE ONLY public.historico_agendamentos
 -- PostgreSQL database dump complete
 --
 
-\unrestrict yeH3KJ4zuRSQWiQJxnfd7fsp6SNPhYpnJwmEyKPqUGMickjccnGXIvavsBqgiME
-
-
-
 -- ==================================================
 -- DADOS INICIAIS - SALAS
 -- ==================================================
 
+-- Inserir salas apenas se não existirem
 INSERT INTO public.salas (nome, capacidade, ativa, criado_em, atualizado_em) VALUES
 ('Sala da Esquerda', 7, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('Sala da Direita', 5, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('Auditório', 30, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('Auditório', 30, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (nome) DO NOTHING;
