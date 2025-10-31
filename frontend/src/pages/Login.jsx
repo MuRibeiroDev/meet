@@ -14,14 +14,7 @@ const Login = () => {
   const [validated, setValidated] = useState(false)
   const [loginError, setLoginError] = useState('')
   const navigate = useNavigate()
-  const { token, setAuth } = useAuthStore()
-
-  // Redirecionar se já estiver autenticado
-  useEffect(() => {
-    if (token) {
-      navigate('/', { replace: true })
-    }
-  }, [token, navigate])
+  const setAuth = useAuthStore((state) => state.setAuth)
 
   const handleChange = (e) => {
     setFormData({
@@ -52,8 +45,23 @@ const Login = () => {
 
     try {
       const response = await authService.login(formData.email, formData.senha)
+      console.log('1. Login response:', { usuario: response.usuario?.nome, hasToken: !!response.token })
+      
+      // Aguardar o setAuth persistir o estado
       setAuth(response.usuario, response.token)
-      // O useEffect vai redirecionar automaticamente
+      console.log('2. After setAuth')
+      
+      // Verifica localStorage
+      const stored = localStorage.getItem('auth-storage')
+      console.log('3. localStorage:', stored ? 'EXISTS' : 'EMPTY')
+      
+      // Pequeno delay para garantir que o estado foi persistido
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      console.log('4. Navigating to /')
+      
+      // Redirecionar após login bem-sucedido
+      navigate('/', { replace: true })
     } catch (error) {
       const errorMessage = error.message || error.response?.data?.message || 'Email ou senha incorretos'
       

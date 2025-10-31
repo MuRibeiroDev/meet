@@ -3,21 +3,33 @@ import { persist } from 'zustand/middleware'
 
 export const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       usuario: null,
       token: null,
       
-      setAuth: (usuario, token) => set({ usuario, token }),
+      setAuth: (usuario, token) => {
+        set({ usuario, token })
+        // Força sincronização imediata com localStorage
+        localStorage.setItem('auth-storage', JSON.stringify({
+          state: { usuario, token },
+          version: 0
+        }))
+      },
       
-      logout: () => set({ usuario: null, token: null }),
+      logout: () => {
+        set({ usuario: null, token: null })
+        // Limpa localStorage imediatamente
+        localStorage.removeItem('auth-storage')
+      },
       
       isAuthenticated: () => {
-        const state = useAuthStore.getState()
+        const state = get()
         return !!state.token
       }
     }),
     {
       name: 'auth-storage',
+      skipHydration: false,
     }
   )
 )

@@ -15,14 +15,7 @@ const Register = () => {
   const [validated, setValidated] = useState(false)
   const [registerError, setRegisterError] = useState('')
   const navigate = useNavigate()
-  const { token, setAuth } = useAuthStore()
-
-  // Redirecionar se já estiver autenticado
-  useEffect(() => {
-    if (token) {
-      navigate('/', { replace: true })
-    }
-  }, [token, navigate])
+  const setAuth = useAuthStore((state) => state.setAuth)
 
   const handleChange = (e) => {
     setFormData({
@@ -60,15 +53,15 @@ const Register = () => {
         formData.email,
         formData.senha
       )
+      
+      // Aguardar o setAuth persistir o estado
       setAuth(response.usuario, response.token)
       
-      // Animar saída
-      document.body.classList.add('login-leaving')
-      document.querySelector('.login-container').classList.add('leaving')
+      // Pequeno delay para garantir que o estado foi persistido
+      await new Promise(resolve => setTimeout(resolve, 100))
       
-      setTimeout(() => {
-        navigate('/')
-      }, 400)
+      // Redirecionar após registro bem-sucedido
+      navigate('/', { replace: true })
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Erro ao cadastrar'
       setRegisterError(errorMessage)
