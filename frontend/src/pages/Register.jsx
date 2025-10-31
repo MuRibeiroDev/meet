@@ -9,9 +9,8 @@ const Register = () => {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
-    senha: '',
-    confirmarSenha: ''
-  })
+    senha: ''
+  });
   const [loading, setLoading] = useState(false)
   const [validated, setValidated] = useState(false)
   const [registerError, setRegisterError] = useState('')
@@ -35,12 +34,6 @@ const Register = () => {
 
     const form = e.currentTarget
     if (form.checkValidity() === false) {
-      setValidated(true)
-      return
-    }
-
-    if (formData.senha !== formData.confirmarSenha) {
-      setRegisterError('As senhas não coincidem')
       setValidated(true)
       return
     }
@@ -147,7 +140,7 @@ const Register = () => {
                 </div>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-4">
                 <label htmlFor="senha" className="form-label fw-medium">
                   Senha
                 </label>
@@ -168,28 +161,6 @@ const Register = () => {
                     disabled={loading}
                   />
                 </div>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="confirmarSenha" className="form-label fw-medium">
-                  Confirmar Senha
-                </label>
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="bi bi-lock-fill"></i>
-                  </span>
-                  <input
-                    type="password"
-                    className={`form-control ${registerError ? 'is-invalid shake' : ''}`}
-                    id="confirmarSenha"
-                    name="confirmarSenha"
-                    value={formData.confirmarSenha}
-                    onChange={handleChange}
-                    placeholder="Digite a senha novamente"
-                    required
-                    disabled={loading}
-                  />
-                </div>
                 {registerError && (
                   <div className="text-danger mt-2" style={{ fontSize: '0.875rem' }}>
                     <i className="bi bi-exclamation-circle me-1"></i>
@@ -198,7 +169,7 @@ const Register = () => {
                 )}
               </div>
 
-              <div className="d-grid">
+              <div className="d-grid mt-3">
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                   {loading ? (
                     <span className="spinner-border spinner-border-sm"></span>
@@ -210,16 +181,6 @@ const Register = () => {
                 </button>
               </div>
             </form>
-
-            <div className="divider">
-              <span>ou</span>
-            </div>
-
-            <div className="d-grid">
-              <Link to="/login" className="btn btn-outline-secondary">
-                <i className="bi bi-arrow-left me-2"></i>Voltar para Login
-              </Link>
-            </div>
           </div>
         </div>
       </div>

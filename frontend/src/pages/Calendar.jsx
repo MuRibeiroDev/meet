@@ -172,7 +172,7 @@ const Calendar = () => {
       const dataInicio = new Date(`${formData.data}T${formData.hora_inicio}:00`)
       const dataFim = new Date(`${formData.data}T${formData.hora_fim}:00`)
       
-      // Formatar manualmente para manter o horário local
+      // Formatar manualmente para manter o horário local com timezone de Brasília
       const formatarDataLocal = (data) => {
         const ano = data.getFullYear()
         const mes = String(data.getMonth() + 1).padStart(2, '0')
@@ -180,7 +180,7 @@ const Calendar = () => {
         const hora = String(data.getHours()).padStart(2, '0')
         const minuto = String(data.getMinutes()).padStart(2, '0')
         const segundo = String(data.getSeconds()).padStart(2, '0')
-        return `${ano}-${mes}-${dia}T${hora}:${minuto}:${segundo}`
+        return `${ano}-${mes}-${dia}T${hora}:${minuto}:${segundo}-03:00`
       }
       
       const payload = {

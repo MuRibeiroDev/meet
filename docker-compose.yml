@@ -6,6 +6,7 @@ services:
     image: postgres:15-alpine
     container_name: reunioes-postgres
     restart: unless-stopped
+    command: postgres -c timezone=America/Sao_Paulo
     environment:
       - POSTGRES_DB=reuniao
       - POSTGRES_USER=root

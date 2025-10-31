@@ -75,12 +75,15 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   background: var(--gray-50);
-  padding: 2rem 1rem;
+  padding: 1rem 1rem 8rem 1rem;
+  overflow-y: auto;
+  width: 100%;
 }
 
 .login-card {
   width: 100%;
   max-width: 400px;
+  margin: auto;
 }
 
 .login-card .card {
@@ -88,10 +91,108 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   background: var(--white);
+  width: 100%;
 }
 
 .login-card .card-body {
   padding: 2rem !important;
+  width: 100%;
+}
+
+/* Responsividade para Tablets e Desktop */
+@media (min-width: 768px) {
+  .login-container {
+    padding: 1rem 1.5rem;
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .login-card {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  
+  .login-card .card-body {
+    padding: 1rem !important;
+  }
+  
+  /* Reduzir espaçamento do header */
+  .login-card .text-center.mb-2 {
+    margin-bottom: 0.35rem !important;
+  }
+  
+  .login-card .text-center .mb-1 {
+    margin-bottom: 0 !important;
+  }
+  
+  .login-card .text-center img {
+    max-width: 200px !important;
+  }
+  
+  .login-card h4 {
+    font-size: 1.25rem;
+    margin-bottom: 0.1rem !important;
+  }
+  
+  .login-card .text-muted {
+    font-size: 0.7rem;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Reduzir espaçamento entre campos */
+  .login-card .mb-3 {
+    margin-bottom: 0.4rem !important;
+  }
+  
+  .login-card .mb-4 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .login-card .form-label {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+  }
+  
+  .login-card .form-control {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.85rem;
+  }
+  
+  .login-card .input-group-text {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.85rem;
+  }
+  
+  .login-card .btn-primary,
+  .login-card .btn-success,
+  .login-card .btn-outline-secondary {
+    padding: 0.5rem;
+    min-height: 38px;
+    height: 38px;
+    font-size: 0.85rem;
+  }
+  
+  .login-card .divider {
+    margin: 0.4rem 0;
+  }
+  
+  .login-card .divider span {
+    font-size: 0.7rem;
+    padding: 0 0.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .login-card {
+    max-width: 440px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .login-card {
+    max-width: 460px;
+  }
 }
 
 .login-card .input-group-text {
@@ -154,6 +255,30 @@ h1, h2, h3, h4, h5, h6 {
   background: #059669;
   border-color: #059669;
   color: white;
+}
+
+.login-card .btn-outline-secondary {
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--gray-300);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-700);
+  min-height: 50px;
+  height: 50px;
+  width: 100%;
+}
+
+.login-card .btn-outline-secondary:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+  color: var(--gray-900);
 }
 
 /* Esqueci minha senha */
@@ -281,7 +406,7 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 576px) {
   .login-container {
     padding: 0.5rem;
-    padding-bottom: 2rem;
+    padding-bottom: 12rem;
     align-items: flex-start;
     overflow-y: auto;
     overflow-x: hidden;
@@ -292,7 +417,7 @@ h1, h2, h3, h4, h5, h6 {
   
   .login-card {
     max-width: 100%;
-    margin: 1rem auto 2rem;
+    margin: 1rem auto 6rem;
     min-height: auto;
   }
   
@@ -324,11 +449,11 @@ h1, h2, h3, h4, h5, h6 {
   .login-container {
     align-items: flex-start !important;
     padding-top: 1rem;
-    padding-bottom: 3rem;
+    padding-bottom: 10rem;
   }
   
   .login-card {
-    margin: 0.5rem auto 3rem;
+    margin: 0.5rem auto 6rem;
   }
   
   .login-card .card-body {
