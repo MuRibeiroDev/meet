@@ -1,22 +1,23 @@
 -- ==================================================
--- ESTRUTURA DO BANCO DE DADOS
--- Sistema de Agendamento de Salas de ReuniÃ£o
+-- ESTRUTURA COMPLETA DO BANCO DE DADOS
+-- Sistema de Agendamento de Salas de Reunião
 -- ==================================================
-
+-- 
+-- Este script contém:
+-- - DDL: Criação de tabelas, índices, functions, triggers
+-- - DML: Inserção dos dados iniciais (salas)
+-- 
+-- Executado automaticamente na inicialização do container PostgreSQL
 --
--- PostgreSQL database dump
---
 
-\restrict yeH3KJ4zuRSQWiQJxnfd7fsp6SNPhYpnJwmEyKPqUGMickjccnGXIvavsBqgiME
+-- Criar o banco de dados se não existir (executado no banco postgres padrão)
+SELECT 'CREATE DATABASE reuniao'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'reuniao')\gexec
 
--- Dumped from database version 12.20 (Ubuntu 12.20-0ubuntu0.20.04.1)
--- Dumped by pg_dump version 15.14
+-- Conectar ao banco de dados reuniao
+\connect reuniao
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
 SET timezone = 'America/Sao_Paulo';
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
