@@ -1,13 +1,30 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useAuthStore } from './store/authStore'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Calendar from './pages/Calendar'
-import SalaDisplay from './pages/SalaDisplay'
-import ForgotPassword from './pages/ForgotPassword'
+
+// Lazy loading para páginas que não são imediatamente necessárias
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const Calendar = lazy(() => import('./pages/Calendar'))
+const SalaDisplay = lazy(() => import('./pages/SalaDisplay'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+
+// Loading component
+const PageLoader = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    background: '#f5f5f5'
+  }}>
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Carregando...</span>
+    </div>
+  </div>
+)
 
 // Componente de rota protegida
 const ProtectedRoute = ({ children }) => {
@@ -31,26 +48,29 @@ function App() {
         newestOnTop
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
+        pauseOnFocusLoss={false}
         draggable
         pauseOnHover
         theme="light"
+        limit={3}
       />
-      <Routes>
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/sala" element={<SalaDisplay />} />
-        
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Calendar />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/sala" element={<SalaDisplay />} />
+          
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Calendar />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Suspense>
     </Router>
   )
 }

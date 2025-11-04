@@ -1,38 +1,38 @@
-# Dockerfile para Backend Node.js
-FROM node:18-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
-# Instalar dependências do sistema para melhor performance e timezone
-RUN apk add --no-cache tini tzdata
+WORKDIR /app
 
-# Configurar timezone
-ENV TZ=America/Sao_Paulo
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# Copiar arquivos de dependências
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
 
-# Definir diretório de trabalho
+# Instalar dependências
+RUN npm install
+
+# Copiar código fonte
+COPY src ./src
+
+# Build da aplicação
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine
+
 WORKDIR /app
 
 # Copiar arquivos de dependências
 COPY package*.json ./
 
-# Instalar dependências com cache otimizado
-RUN npm ci --only=production --no-audit --no-fund && \
-    npm cache clean --force
+# Instalar apenas dependências de produção
+RUN npm install --omit=dev && npm cache clean --force
 
-# Copiar código fonte
-COPY . .
-
-# Usar usuário não-root para segurança
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
-
-USER nodejs
+# Copiar código compilado do builder
+COPY --from=builder /app/dist ./dist
 
 # Expor porta
 EXPOSE 5000
 
-# Usar tini para gerenciamento de processos
-ENTRYPOINT ["/sbin/tini", "--"]
-
-# Comando para iniciar a aplicação
-CMD ["node", "server.js"]
+# Comando para iniciar aplicação
+CMD ["node", "dist/main.js"]

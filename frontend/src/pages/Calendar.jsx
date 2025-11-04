@@ -537,7 +537,7 @@ const Calendar = () => {
                     className="btn btn-primary"
                     onClick={salvarAgendamento}
                     disabled={salvando}
-                    style={{ width: '102px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ minWidth: '102px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {salvando ? (
                       <span 
