@@ -86,9 +86,7 @@ const Calendar = () => {
     }
     try {
       const dataStr = formatarDataInput(dataAtual)
-      console.log('Carregando agendamentos para:', dataStr)
       const data = await agendamentosService.getAll({ data_inicio: dataStr, data_fim: dataStr })
-      console.log('Agendamentos recebidos:', data)
       
       // Detectar novos agendamentos
       if (agendamentos.length > 0) {
@@ -168,35 +166,23 @@ const Calendar = () => {
 
     setSalvando(true)
     try {
-      // Criar datas considerando timezone local e enviar como está
-      const dataInicio = new Date(`${formData.data}T${formData.hora_inicio}:00`)
-      const dataFim = new Date(`${formData.data}T${formData.hora_fim}:00`)
-      
-      // Formatar manualmente para manter o horário local com timezone de Brasília
-      const formatarDataLocal = (data) => {
-        const ano = data.getFullYear()
-        const mes = String(data.getMonth() + 1).padStart(2, '0')
-        const dia = String(data.getDate()).padStart(2, '0')
-        const hora = String(data.getHours()).padStart(2, '0')
-        const minuto = String(data.getMinutes()).padStart(2, '0')
-        const segundo = String(data.getSeconds()).padStart(2, '0')
-        return `${ano}-${mes}-${dia}T${hora}:${minuto}:${segundo}-03:00`
-      }
+      // Montar strings de data/hora diretamente sem conversão de timezone
+      // Formato: YYYY-MM-DDTHH:MM:SS (sem timezone para evitar conversão UTC)
+      const data_inicio = `${formData.data}T${formData.hora_inicio}:00`
+      const data_fim = `${formData.data}T${formData.hora_fim}:00`
       
       const payload = {
         titulo: `Reunião - ${salaNome}`,
         sala_id: parseInt(formData.sala_id),
-        data_inicio: formatarDataLocal(dataInicio),
-        data_fim: formatarDataLocal(dataFim),
+        data_inicio: data_inicio,
+        data_fim: data_fim,
         participantes: parseInt(formData.participantes) || 1,
         link_reuniao: formData.link_reuniao || null,
         descricao: '',
         observacoes: formData.suporte_ti === 'sim' ? 'Suporte TI solicitado' : null
       }
 
-      console.log('Salvando agendamento:', payload)
       const resultado = await agendamentosService.create(payload)
-      console.log('Agendamento salvo:', resultado)
       mostrarNotificacao('Reunião agendada com sucesso')
       fecharModal()
       setFormData({
@@ -251,7 +237,11 @@ const Calendar = () => {
   }
 
   const formatarHora = (dataHora) => {
-    return new Date(dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    // NÃO usar new Date() - extrair hora direto da string
+    // String vem como: "2025-11-04T10:00:00"
+    if (!dataHora) return ''
+    const hora = dataHora.substring(11, 16) // Pega "10:00" da posição 11 até 16
+    return hora
   }
 
   const isDataAnterior = () => {
@@ -597,8 +587,7 @@ const Calendar = () => {
                       <strong>Data/Hora:</strong>
                       <br />
                       <small>
-                        {new Date(agendamentoAtual.data_inicio).toLocaleString('pt-BR')} -{' '}
-                        {formatarHora(agendamentoAtual.data_fim)}
+                        {agendamentoAtual.data_inicio.substring(0, 10).split('-').reverse().join('/')} {formatarHora(agendamentoAtual.data_inicio)} - {formatarHora(agendamentoAtual.data_fim)}
                       </small>
                     </div>
 

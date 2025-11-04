@@ -30,7 +30,7 @@ import { Agendamento } from './entities/agendamento.entity';
         entities: [Usuario, Sala, Agendamento],
         synchronize: false,
         logging: configService.get('NODE_ENV') === 'development',
-        timezone: '-03:00',
+        // Não definir timezone - deixa o PostgreSQL lidar com timestamp without time zone
       }),
       inject: [ConfigService],
     }),

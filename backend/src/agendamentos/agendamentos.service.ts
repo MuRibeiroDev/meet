@@ -11,6 +11,8 @@ import { Agendamento } from '../entities/agendamento.entity';
 import { Sala } from '../entities/sala.entity';
 import { Usuario } from '../entities/usuario.entity';
 import { CreateAgendamentoDto, UpdateAgendamentoDto } from './dto/agendamento.dto';
+import { EmailService } from '../common/services/email.service';
+import { ChamadosService } from '../common/services/chamados.service';
 
 @Injectable()
 export class AgendamentosService {
@@ -19,12 +21,14 @@ export class AgendamentosService {
     private agendamentosRepository: Repository<Agendamento>,
     @InjectRepository(Sala)
     private salasRepository: Repository<Sala>,
+    private emailService: EmailService,
+    private chamadosService: ChamadosService,
   ) {}
 
   private async verificarConflito(
     sala_id: number,
-    data_inicio: Date,
-    data_fim: Date,
+    data_inicio: string,
+    data_fim: string,
     excluir_id?: number,
   ): Promise<boolean> {
     const query = this.agendamentosRepository
@@ -57,9 +61,10 @@ export class AgendamentosService {
     if (usuario_id) where.usuario_id = parseInt(usuario_id);
 
     if (data_inicio && data_fim) {
-      const inicioData = new Date(data_inicio + 'T00:00:00.000Z');
-      const fimData = new Date(data_fim + 'T23:59:59.999Z');
-      where.data_inicio = Between(inicioData, fimData);
+      // Usar strings direto, sem conversão para Date
+      const inicioStr = data_inicio + ' 00:00:00';
+      const fimStr = data_fim + ' 23:59:59';
+      where.data_inicio = Between(inicioStr, fimStr);
     }
 
     const agendamentos = await this.agendamentosRepository.find({
@@ -98,14 +103,20 @@ export class AgendamentosService {
       observacoes,
     } = createAgendamentoDto;
 
-    console.log('Data recebida no backend:', { data_inicio, data_fim });
+    console.log('========================================');
+    console.log('📅 Data recebida no backend:');
+    console.log('   data_inicio:', data_inicio);
+    console.log('   data_fim:', data_fim);
+    console.log('   Tipo data_inicio:', typeof data_inicio);
+    console.log('   Tipo data_fim:', typeof data_fim);
+    console.log('========================================');
 
-    const inicio = new Date(data_inicio);
-    const fim = new Date(data_fim);
-
-    console.log('Data convertida no backend:', { inicio, fim });
-
-    if (fim <= inicio) {
+    // Não converter para Date - salvar como string diretamente
+    // Frontend envia: "2024-11-03T10:00:00" (sem timezone)
+    // PostgreSQL armazena como timestamp without time zone
+    
+    // Validação simples: comparar strings
+    if (data_fim <= data_inicio) {
       throw new BadRequestException('Data de fim deve ser maior que data de início');
     }
 
@@ -115,20 +126,20 @@ export class AgendamentosService {
       throw new NotFoundException('Sala não encontrada ou inativa');
     }
 
-    // Verificar conflitos
-    const temConflito = await this.verificarConflito(sala_id, inicio, fim);
+    // Verificar conflitos (passar as strings direto)
+    const temConflito = await this.verificarConflito(sala_id, data_inicio, data_fim);
     if (temConflito) {
       throw new ConflictException('Já existe um agendamento para este horário');
     }
 
-    // Criar agendamento
+    // Criar agendamento (salvar strings direto no banco)
     const agendamento = this.agendamentosRepository.create({
       sala_id,
       usuario_id: usuario.id,
       titulo,
       descricao,
-      data_inicio: inicio,
-      data_fim: fim,
+      data_inicio: data_inicio,
+      data_fim: data_fim,
       participantes: participantes || 1,
       link_reuniao,
       observacoes,
@@ -137,12 +148,52 @@ export class AgendamentosService {
 
     await this.agendamentosRepository.save(agendamento);
 
-    console.log('Agendamento criado:', agendamento.data_inicio, agendamento.data_fim);
+    console.log('========================================');
+    console.log('✅ Agendamento SALVO no banco:');
+    console.log('   data_inicio:', agendamento.data_inicio);
+    console.log('   data_fim:', agendamento.data_fim);
+    console.log('========================================');
 
     // Buscar agendamento com relacionamentos
     const agendamentoCriado = await this.agendamentosRepository.findOne({
       where: { id: agendamento.id },
     });
+
+    // Criar chamado TI se solicitado (não bloquear se falhar)
+    if (observacoes && observacoes.includes('Suporte TI solicitado')) {
+      try {
+        const ticketId = await this.chamadosService.criarChamadoTI(
+          agendamentoCriado,
+          usuario,
+          sala,
+        );
+        if (ticketId) {
+          console.log('Chamado TI criado com sucesso. Ticket ID:', ticketId);
+        }
+      } catch (error) {
+        console.error('Erro ao criar chamado TI (não crítico):', error);
+        // Não bloqueia a criação do agendamento se falhar
+      }
+    }
+
+    // Enviar notificação por email
+    try {
+      const meetingData = {
+        titulo: agendamentoCriado.titulo,
+        descricao: agendamentoCriado.descricao,
+        data_inicio: agendamentoCriado.data_inicio,
+        data_fim: agendamentoCriado.data_fim,
+        sala_nome: sala.nome,
+        responsavel: usuario.nome,
+        participantes: agendamentoCriado.participantes,
+        link_reuniao: agendamentoCriado.link_reuniao,
+      };
+      
+      await this.emailService.notifyMultipleUsers(meetingData, 'new');
+    } catch (error) {
+      console.error('Erro ao enviar notificações de email:', error);
+      // Não bloqueia a criação do agendamento se o email falhar
+    }
 
     return agendamentoCriado;
   }
@@ -155,8 +206,8 @@ export class AgendamentosService {
 
     // Se mudou horário, verificar conflitos
     if (data_inicio || data_fim) {
-      const inicio = data_inicio ? new Date(data_inicio) : agendamento.data_inicio;
-      const fim = data_fim ? new Date(data_fim) : agendamento.data_fim;
+      const inicio = data_inicio ? data_inicio : agendamento.data_inicio;
+      const fim = data_fim ? data_fim : agendamento.data_fim;
 
       if (fim <= inicio) {
         throw new BadRequestException('Data de fim deve ser maior que data de início');
@@ -176,8 +227,8 @@ export class AgendamentosService {
     // Atualizar
     if (titulo) agendamento.titulo = titulo;
     if (descricao !== undefined) agendamento.descricao = descricao;
-    if (data_inicio) agendamento.data_inicio = new Date(data_inicio);
-    if (data_fim) agendamento.data_fim = new Date(data_fim);
+    if (data_inicio) agendamento.data_inicio = data_inicio;
+    if (data_fim) agendamento.data_fim = data_fim;
     if (participantes) agendamento.participantes = participantes;
     if (link_reuniao !== undefined) agendamento.link_reuniao = link_reuniao;
     if (observacoes !== undefined) agendamento.observacoes = observacoes;
@@ -208,16 +259,36 @@ export class AgendamentosService {
       throw new BadRequestException('Não é possível cancelar uma reunião que já começou');
     }
 
+    // Preparar dados para email antes de deletar
+    const meetingData = {
+      titulo: agendamento.titulo,
+      descricao: agendamento.descricao,
+      data_inicio: agendamento.data_inicio,
+      data_fim: agendamento.data_fim,
+      sala_nome: agendamento.sala?.nome || 'Não informado',
+      responsavel: usuario.nome,
+      participantes: agendamento.participantes,
+      link_reuniao: agendamento.link_reuniao,
+    };
+
     console.log('Deletando agendamento ID:', id);
     await this.agendamentosRepository.remove(agendamento);
+
+    // Enviar notificação de cancelamento
+    try {
+      await this.emailService.notifyMultipleUsers(meetingData, 'cancel');
+    } catch (error) {
+      console.error('Erro ao enviar notificações de cancelamento:', error);
+      // Não bloqueia o cancelamento se o email falhar
+    }
 
     return { message: 'Agendamento cancelado com sucesso' };
   }
 
   async getDisponibilidade(sala_id: number, data: string) {
-    const dataConsulta = new Date(data);
-    const inicioDia = new Date(dataConsulta.setHours(0, 0, 0, 0));
-    const fimDia = new Date(dataConsulta.setHours(23, 59, 59, 999));
+    // Usar strings direto para timestamp without time zone
+    const inicioDia = `${data} 00:00:00`;
+    const fimDia = `${data} 23:59:59`;
 
     const agendamentos = await this.agendamentosRepository.find({
       where: {

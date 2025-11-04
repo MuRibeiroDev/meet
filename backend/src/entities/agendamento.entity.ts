@@ -27,11 +27,11 @@ export class Agendamento {
   @Column({ type: 'text', nullable: true })
   descricao: string;
 
-  @Column({ type: 'timestamp', name: 'data_inicio' })
-  data_inicio: Date;
+  @Column({ type: 'timestamp without time zone', name: 'data_inicio' })
+  data_inicio: string;
 
-  @Column({ type: 'timestamp', name: 'data_fim' })
-  data_fim: Date;
+  @Column({ type: 'timestamp without time zone', name: 'data_fim' })
+  data_fim: string;
 
   @Column({ type: 'varchar', length: 20, default: 'confirmado' })
   status: string;
