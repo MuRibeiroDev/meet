@@ -181,8 +181,8 @@ export class AgendamentosService {
       const meetingData = {
         titulo: agendamentoCriado.titulo,
         descricao: agendamentoCriado.descricao,
-        data_inicio: String(agendamentoCriado.data_inicio), // Garantir que é string
-        data_fim: String(agendamentoCriado.data_fim), // Garantir que é string
+        data_inicio: agendamentoCriado.data_inicio,
+        data_fim: agendamentoCriado.data_fim,
         sala_nome: sala.nome,
         responsavel: usuario.nome,
         participantes: agendamentoCriado.participantes,
@@ -270,8 +270,8 @@ export class AgendamentosService {
     const meetingData = {
       titulo: agendamento.titulo,
       descricao: agendamento.descricao,
-      data_inicio: String(agendamento.data_inicio), // Garantir que é string
-      data_fim: String(agendamento.data_fim), // Garantir que é string
+      data_inicio: agendamento.data_inicio,
+      data_fim: agendamento.data_fim,
       sala_nome: agendamento.sala?.nome || 'Não informado',
       responsavel: usuario.nome,
       participantes: agendamento.participantes,
