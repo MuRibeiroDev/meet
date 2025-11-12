@@ -44,17 +44,39 @@ export class EmailService {
 
   private formatDateTime(dateString: string | Date): string {
     try {
-      // Se a string vem no formato "YYYY-MM-DDTHH:mm:ss" sem timezone,
-      // precisamos tratá-la como horário local, não UTC
-      const dateStr = dateString.toString();
+      // Converter para string se for Date object
+      let dateStr = dateString instanceof Date ? dateString.toISOString() : dateString.toString();
       
-      // Parse manual para evitar conversão de timezone
-      // Suporta formatos: "YYYY-MM-DDTHH:mm:ss" ou "YYYY-MM-DD HH:mm:ss"
-      const normalizedStr = dateStr.replace(' ', 'T');
+      // Se a string contém "GMT" ou formato Date.toString(), tentar extrair info
+      if (dateStr.includes('GMT')) {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          // Extrair componentes manualmente para evitar timezone
+          const year = date.getUTCFullYear();
+          const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+          const day = date.getUTCDate().toString().padStart(2, '0');
+          const hour = date.getUTCHours().toString().padStart(2, '0');
+          const minute = date.getUTCMinutes().toString().padStart(2, '0');
+          return `${day}/${month}/${year}, ${hour}:${minute}`;
+        }
+      }
+      
+      // Parse manual para formato "YYYY-MM-DDTHH:mm:ss" ou "YYYY-MM-DD HH:mm:ss"
+      const normalizedStr = dateStr.replace(' ', 'T').substring(0, 19); // Remove timezone se houver
       const [datePart, timePart] = normalizedStr.split('T');
       
       if (!datePart || !timePart) {
-        return dateString.toString();
+        // Fallback: tentar criar Date e extrair
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          const day = date.getUTCDate().toString().padStart(2, '0');
+          const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+          const year = date.getUTCFullYear();
+          const hour = date.getUTCHours().toString().padStart(2, '0');
+          const minute = date.getUTCMinutes().toString().padStart(2, '0');
+          return `${day}/${month}/${year}, ${hour}:${minute}`;
+        }
+        return 'Data inválida';
       }
       
       const [year, month, day] = datePart.split('-').map(Number);
@@ -63,7 +85,8 @@ export class EmailService {
       // Formatar no padrão brasileiro: DD/MM/YYYY, HH:mm
       return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}, ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
     } catch (error) {
-      return dateString.toString();
+      console.error('Erro ao formatar data:', error, 'Input:', dateString);
+      return 'Data inválida';
     }
   }
 

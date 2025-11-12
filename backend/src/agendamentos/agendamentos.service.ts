@@ -181,13 +181,20 @@ export class AgendamentosService {
       const meetingData = {
         titulo: agendamentoCriado.titulo,
         descricao: agendamentoCriado.descricao,
-        data_inicio: agendamentoCriado.data_inicio,
-        data_fim: agendamentoCriado.data_fim,
+        data_inicio: String(agendamentoCriado.data_inicio), // Garantir que é string
+        data_fim: String(agendamentoCriado.data_fim), // Garantir que é string
         sala_nome: sala.nome,
         responsavel: usuario.nome,
         participantes: agendamentoCriado.participantes,
         link_reuniao: agendamentoCriado.link_reuniao,
       };
+      
+      console.log('📧 Enviando email com dados:', {
+        data_inicio: meetingData.data_inicio,
+        data_fim: meetingData.data_fim,
+        tipo_inicio: typeof meetingData.data_inicio,
+        tipo_fim: typeof meetingData.data_fim
+      });
       
       await this.emailService.notifyMultipleUsers(meetingData, 'new');
     } catch (error) {
@@ -263,8 +270,8 @@ export class AgendamentosService {
     const meetingData = {
       titulo: agendamento.titulo,
       descricao: agendamento.descricao,
-      data_inicio: agendamento.data_inicio,
-      data_fim: agendamento.data_fim,
+      data_inicio: String(agendamento.data_inicio), // Garantir que é string
+      data_fim: String(agendamento.data_fim), // Garantir que é string
       sala_nome: agendamento.sala?.nome || 'Não informado',
       responsavel: usuario.nome,
       participantes: agendamento.participantes,
