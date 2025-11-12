@@ -176,31 +176,28 @@ export class AgendamentosService {
       }
     }
 
-    // Enviar notificação por email
-    try {
-      const meetingData = {
-        titulo: agendamentoCriado.titulo,
-        descricao: agendamentoCriado.descricao,
-        data_inicio: agendamentoCriado.data_inicio,
-        data_fim: agendamentoCriado.data_fim,
-        sala_nome: sala.nome,
-        responsavel: usuario.nome,
-        participantes: agendamentoCriado.participantes,
-        link_reuniao: agendamentoCriado.link_reuniao,
-      };
-      
-      console.log('📧 Enviando email com dados:', {
-        data_inicio: meetingData.data_inicio,
-        data_fim: meetingData.data_fim,
-        tipo_inicio: typeof meetingData.data_inicio,
-        tipo_fim: typeof meetingData.data_fim
-      });
-      
-      await this.emailService.notifyMultipleUsers(meetingData, 'new');
-    } catch (error) {
-      console.error('Erro ao enviar notificações de email:', error);
-      // Não bloqueia a criação do agendamento se o email falhar
-    }
+    // Enviar notificação por email de forma não-bloqueante
+    const meetingData = {
+      titulo: agendamentoCriado.titulo,
+      descricao: agendamentoCriado.descricao,
+      data_inicio: agendamentoCriado.data_inicio,
+      data_fim: agendamentoCriado.data_fim,
+      sala_nome: sala.nome,
+      responsavel: usuario.nome,
+      participantes: agendamentoCriado.participantes,
+      link_reuniao: agendamentoCriado.link_reuniao,
+    };
+    
+    // Enviar em background sem bloquear a resposta
+    Promise.resolve().then(async () => {
+      try {
+        console.log('📧 Enviando email em background...');
+        await this.emailService.notifyMultipleUsers(meetingData, 'new');
+        console.log('✅ Email enviado com sucesso');
+      } catch (error) {
+        console.error('❌ Erro ao enviar email (não crítico):', error);
+      }
+    });
 
     return agendamentoCriado;
   }
@@ -281,13 +278,16 @@ export class AgendamentosService {
     console.log('Deletando agendamento ID:', id);
     await this.agendamentosRepository.remove(agendamento);
 
-    // Enviar notificação de cancelamento
-    try {
-      await this.emailService.notifyMultipleUsers(meetingData, 'cancel');
-    } catch (error) {
-      console.error('Erro ao enviar notificações de cancelamento:', error);
-      // Não bloqueia o cancelamento se o email falhar
-    }
+    // Enviar notificação de cancelamento em background sem bloquear
+    Promise.resolve().then(async () => {
+      try {
+        console.log('📧 Enviando email de cancelamento em background...');
+        await this.emailService.notifyMultipleUsers(meetingData, 'cancel');
+        console.log('✅ Email de cancelamento enviado');
+      } catch (error) {
+        console.error('❌ Erro ao enviar email de cancelamento (não crítico):', error);
+      }
+    });
 
     return { message: 'Agendamento cancelado com sucesso' };
   }

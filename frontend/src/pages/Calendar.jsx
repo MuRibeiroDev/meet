@@ -165,25 +165,28 @@ const Calendar = () => {
     const salaNome = salaObj ? salaObj.nome : 'Reunião'
 
     setSalvando(true)
-    try {
-      // Montar strings de data/hora diretamente sem conversão de timezone
-      // Formato: YYYY-MM-DDTHH:MM:SS (sem timezone para evitar conversão UTC)
-      const data_inicio = `${formData.data}T${formData.hora_inicio}:00`
-      const data_fim = `${formData.data}T${formData.hora_fim}:00`
-      
-      const payload = {
-        titulo: `Reunião - ${salaNome}`,
-        sala_id: parseInt(formData.sala_id),
-        data_inicio: data_inicio,
-        data_fim: data_fim,
-        participantes: parseInt(formData.participantes) || 1,
-        link_reuniao: formData.link_reuniao || null,
-        descricao: '',
-        observacoes: formData.suporte_ti === 'sim' ? 'Suporte TI solicitado' : null
-      }
+    
+    // Montar strings de data/hora diretamente sem conversão de timezone
+    // Formato: YYYY-MM-DDTHH:MM:SS (sem timezone para evitar conversão UTC)
+    const data_inicio = `${formData.data}T${formData.hora_inicio}:00`
+    const data_fim = `${formData.data}T${formData.hora_fim}:00`
+    
+    const payload = {
+      titulo: `Reunião - ${salaNome}`,
+      sala_id: parseInt(formData.sala_id),
+      data_inicio: data_inicio,
+      data_fim: data_fim,
+      participantes: parseInt(formData.participantes) || 1,
+      link_reuniao: formData.link_reuniao || null,
+      descricao: '',
+      observacoes: formData.suporte_ti === 'sim' ? 'Suporte TI solicitado' : null
+    }
 
-      const resultado = await agendamentosService.create(payload)
-      mostrarNotificacao('Reunião agendada com sucesso')
+    try {
+      // Executar em paralelo: salvar e fechar modal
+      const salvarPromise = agendamentosService.create(payload)
+      
+      // Fechar modal imediatamente
       fecharModal()
       setFormData({
         sala_id: '',
@@ -194,6 +197,13 @@ const Calendar = () => {
         participantes: 1,
         suporte_ti: 'nao'
       })
+      
+      // Aguardar salvamento em background
+      await salvarPromise
+      
+      mostrarNotificacao('Reunião agendada com sucesso')
+      
+      // Recarregar lista
       loadAgendamentos()
     } catch (error) {
       console.error('Erro ao salvar:', error)
@@ -223,16 +233,24 @@ const Calendar = () => {
     
     if (!window.confirm('Tem certeza que deseja cancelar esta reunião?')) return
 
+    const agendamentoId = agendamentoAtual.id
+    
+    // Fechar modal imediatamente
+    fecharDetalhes()
+    setAgendamentoAtual(null)
+
     try {
-      console.log('Cancelando agendamento ID:', agendamentoAtual.id)
-      await agendamentosService.delete(agendamentoAtual.id)
+      // Deletar em background
+      await agendamentosService.delete(agendamentoId)
       mostrarNotificacao('Reunião cancelada')
-      fecharDetalhes()
-      setAgendamentoAtual(null)
+      
+      // Recarregar lista
       loadAgendamentos()
     } catch (error) {
       console.error('Erro ao cancelar:', error)
       mostrarNotificacao('Erro ao cancelar reunião', 'error')
+      // Em caso de erro, recarregar para sincronizar
+      loadAgendamentos()
     }
   }
 
