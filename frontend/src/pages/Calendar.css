@@ -598,6 +598,18 @@ body {
   width: 100%;
 }
 
+/* Centralizar campos de data e hora */
+.modal-body input[type="date"],
+.modal-body input[type="time"] {
+  text-align: center;
+}
+
+/* Para navegadores WebKit (Chrome, Safari, Edge) */
+.modal-body input[type="date"]::-webkit-calendar-picker-indicator,
+.modal-body input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
 .modal-footer {
   display: flex;
   align-items: center;
@@ -1034,6 +1046,19 @@ input[type="time"].form-control ~ .form-text {
   .modal-body .row {
     margin-left: 0;
     margin-right: 0;
+  }
+
+  /* Centralizar campos de data e hora no mobile */
+  .modal-body input[type="date"],
+  .modal-body input[type="time"] {
+    text-align: center;
+    font-size: 16px; /* Previne zoom no iOS */
+  }
+
+  .modal-body .form-label {
+    text-align: center;
+    display: block;
+    width: 100%;
   }
 
   .modal-body .col-6 {

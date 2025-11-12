@@ -431,7 +431,7 @@ const Calendar = () => {
                       <label className="form-label">Data</label>
                       <input
                         type="date"
-                        className="form-control"
+                        className="form-control text-center"
                         name="data"
                         value={formData.data}
                         onChange={handleChange}
@@ -445,7 +445,7 @@ const Calendar = () => {
                           <label className="form-label">Hora Início</label>
                           <input
                             type="time"
-                            className="form-control"
+                            className="form-control text-center"
                             name="hora_inicio"
                             value={formData.hora_inicio}
                             onChange={handleChange}
@@ -458,7 +458,7 @@ const Calendar = () => {
                           <label className="form-label">Hora Fim</label>
                           <input
                             type="time"
-                            className="form-control"
+                            className="form-control text-center"
                             name="hora_fim"
                             value={formData.hora_fim}
                             onChange={handleChange}
