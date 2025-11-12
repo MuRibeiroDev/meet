@@ -4,7 +4,10 @@ import { useAuthStore } from '../store/authStore'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
   },
   timeout: 30000 // 30 segundos timeout
 })
@@ -14,9 +17,9 @@ if (import.meta.env.DEV) {
   console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
 }
 
-// Cache simples para requisições GET
+// Cache MUITO limitado - apenas para prevenir requisições duplicadas em <1 segundo
 const cache = new Map()
-const CACHE_DURATION = 3000 // 3 segundos
+const CACHE_DURATION = 500 // Apenas 500ms para evitar duplicação, não para cache real
 
 // Interceptor para adicionar token em todas as requisições
 api.interceptors.request.use(
@@ -26,7 +29,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    // Verificar cache para requisições GET
+    // Cache MUITO limitado apenas para prevenir requisições duplicadas
     if (config.method === 'get' && !config.params?.nocache) {
       const cacheKey = config.url + JSON.stringify(config.params)
       const cached = cache.get(cacheKey)
@@ -52,7 +55,7 @@ api.interceptors.request.use(
 // Interceptor para tratar erros de autenticação e cachear respostas
 api.interceptors.response.use(
   (response) => {
-    // Cachear respostas GET bem-sucedidas
+    // Cachear respostas GET apenas por 500ms (apenas anti-duplicação)
     if (response.config.method === 'get' && response.status === 200) {
       const cacheKey = response.config.url + JSON.stringify(response.config.params)
       cache.set(cacheKey, {
@@ -60,11 +63,11 @@ api.interceptors.response.use(
         timestamp: Date.now()
       })
       
-      // Limpar cache antigo (mais de 30 segundos)
-      if (cache.size > 50) {
+      // Limpar cache com mais de 2 segundos
+      if (cache.size > 20) {
         const now = Date.now()
         for (const [key, value] of cache.entries()) {
-          if (now - value.timestamp > 30000) {
+          if (now - value.timestamp > 2000) {
             cache.delete(key)
           }
         }
@@ -97,7 +100,8 @@ api.interceptors.response.use(
       
       const hasToken = useAuthStore.getState().token
       if (hasToken) {
-        // Limpar estado
+        // Limpar estado e cache
+        cache.clear()
         useAuthStore.getState().logout()
         
         // Redirecionar apenas se não estiver na página de login

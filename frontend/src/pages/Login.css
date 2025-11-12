@@ -722,12 +722,18 @@ body.login-leaving {
   border-right-color: transparent;
   border-radius: 50%;
   animation: spinner-border 0.75s linear infinite;
+  flex-shrink: 0;
 }
 
 .spinner-border-sm {
   width: 1.25rem;
   height: 1.25rem;
   border-width: 0.15em;
+}
+
+/* Garantir que apenas o spinner gire, não o texto ao lado */
+.btn .spinner-border {
+  animation: spinner-border 0.75s linear infinite;
 }
 
 @keyframes spinner-border {

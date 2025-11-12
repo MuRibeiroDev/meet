@@ -21,13 +21,13 @@ export default defineConfig({
     // Rollup options
     rollupOptions: {
       output: {
-        // Manual chunks para melhor code splitting
+        // Manual chunks para melhor code splitting com hash para cache busting
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-vendor': ['react-toastify', 'react-calendar'],
           'utils': ['axios', 'date-fns', 'zustand']
         },
-        // Asset file names
+        // Asset file names com hash para evitar cache
         assetFileNames: (assetInfo) => {
           let extType = assetInfo.name.split('.').at(1);
           if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
@@ -44,27 +44,26 @@ export default defineConfig({
     // CSS code splitting
     cssCodeSplit: true,
   },
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    strictPort: false,
-    open: false,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      }
-    }
-  },
   // Optimize dependencies
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'axios', 'zustand'],
   },
   // Dev server config
   server: {
-    host: '0.0.0.0', // Permite acesso de qualquer IP da rede
+    host: '0.0.0.0',
     port: 5173,
     strictPort: false,
+    open: false,
+    // Headers para evitar cache no desenvolvimento
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true
+      }
+    }
   },
   // Preview server config
   preview: {

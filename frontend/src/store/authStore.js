@@ -8,17 +8,14 @@ export const useAuthStore = create(
       token: null,
       
       setAuth: (usuario, token) => {
+        console.log('🔐 setAuth chamado:', { usuario: usuario?.nome, hasToken: !!token })
         set({ usuario, token })
-        // Força sincronização imediata com localStorage
-        localStorage.setItem('auth-storage', JSON.stringify({
-          state: { usuario, token },
-          version: 0
-        }))
       },
       
       logout: () => {
+        console.log('🚪 Logout chamado')
         set({ usuario: null, token: null })
-        // Limpa localStorage imediatamente
+        // Limpar localStorage imediatamente
         localStorage.removeItem('auth-storage')
       },
       
@@ -30,6 +27,8 @@ export const useAuthStore = create(
     {
       name: 'auth-storage',
       skipHydration: false,
+      // Versão do storage para forçar limpeza se necessário
+      version: 1,
     }
   )
 )

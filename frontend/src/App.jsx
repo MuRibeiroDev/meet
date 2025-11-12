@@ -29,13 +29,25 @@ const PageLoader = () => (
 // Componente de rota protegida
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuthStore()
-  return token ? children : <Navigate to="/login" replace />
+  
+  if (!token) {
+    console.log('🚫 ProtectedRoute: Sem token, redirecionando para login')
+    return <Navigate to="/login" replace />
+  }
+  
+  return children
 }
 
 // Componente de rota pública (redireciona se já autenticado)
 const PublicRoute = ({ children }) => {
   const { token } = useAuthStore()
-  return !token ? children : <Navigate to="/" replace />
+  
+  if (token) {
+    console.log('✅ PublicRoute: Token existe, redirecionando para home')
+    return <Navigate to="/" replace />
+  }
+  
+  return children
 }
 
 function App() {

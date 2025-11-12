@@ -44,15 +44,24 @@ export class EmailService {
 
   private formatDateTime(dateString: string | Date): string {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'America/Sao_Paulo',
-      });
+      // Se a string vem no formato "YYYY-MM-DDTHH:mm:ss" sem timezone,
+      // precisamos tratá-la como horário local, não UTC
+      const dateStr = dateString.toString();
+      
+      // Parse manual para evitar conversão de timezone
+      // Suporta formatos: "YYYY-MM-DDTHH:mm:ss" ou "YYYY-MM-DD HH:mm:ss"
+      const normalizedStr = dateStr.replace(' ', 'T');
+      const [datePart, timePart] = normalizedStr.split('T');
+      
+      if (!datePart || !timePart) {
+        return dateString.toString();
+      }
+      
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      
+      // Formatar no padrão brasileiro: DD/MM/YYYY, HH:mm
+      return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}, ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
     } catch (error) {
       return dateString.toString();
     }

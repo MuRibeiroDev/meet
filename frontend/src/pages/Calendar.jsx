@@ -530,12 +530,15 @@ const Calendar = () => {
                     style={{ minWidth: '102px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {salvando ? (
-                      <span 
-                        className="spinner-border" 
-                        role="status" 
-                        aria-hidden="true"
-                        style={{ width: '1rem', height: '1rem', borderWidth: '0.15em' }}
-                      ></span>
+                      <>
+                        <span 
+                          className="spinner-border me-2" 
+                          role="status" 
+                          aria-hidden="true"
+                          style={{ width: '1rem', height: '1rem', borderWidth: '0.15em' }}
+                        ></span>
+                        <span>Salvando...</span>
+                      </>
                     ) : (
                       <>
                         <i className="bi bi-check-circle me-1"></i>

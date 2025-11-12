@@ -159,7 +159,10 @@ const Login = () => {
               <div className="d-grid">
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                   {loading ? (
-                    <span className="spinner-border spinner-border-sm"></span>
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      <span>Carregando...</span>
+                    </>
                   ) : (
                     <>
                       <i className="bi bi-arrow-right me-2"></i>Entrar

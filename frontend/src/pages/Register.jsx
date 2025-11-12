@@ -172,7 +172,10 @@ const Register = () => {
               <div className="d-grid mt-3">
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                   {loading ? (
-                    <span className="spinner-border spinner-border-sm"></span>
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      <span>Carregando...</span>
+                    </>
                   ) : (
                     <>
                       <i className="bi bi-person-plus me-2"></i>Criar Conta

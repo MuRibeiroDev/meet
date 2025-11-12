@@ -153,7 +153,10 @@ const ForgotPassword = () => {
                 <div className="d-grid mb-3">
                   <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? (
-                      <span className="spinner-border spinner-border-sm"></span>
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2"></span>
+                        <span>Carregando...</span>
+                      </>
                     ) : (
                       <>
                         <i className="bi bi-envelope me-2"></i>Enviar Código
@@ -252,7 +255,10 @@ const ForgotPassword = () => {
                 <div className="d-grid mb-3">
                   <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? (
-                      <span className="spinner-border spinner-border-sm"></span>
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2"></span>
+                        <span>Carregando...</span>
+                      </>
                     ) : (
                       <>
                         <i className="bi bi-check-circle me-2"></i>Redefinir Senha
